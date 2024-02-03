@@ -1,7 +1,7 @@
 include = -I.\include\ -L.\lib\ -lmingw32 -lSDL2main -lSDL2 -llineAlgorithm 
-flags = -std=c++20 -O3 -Wall 
+flags = -std=c++20 -O3 -Wall -Werror
 
-all :
+test :
 	g++ .\src\main.cpp .\src\SDL2PXS.cpp -o main $(flags) $(include)
 	.\main.exe
 build :
