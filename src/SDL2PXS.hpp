@@ -3,16 +3,17 @@
 #include <SDL.h>
 #include <lineAlgorithm.hpp>
 #include <iostream>
+#include <array>
 #include <vector>
-
 #define S std::
 
 struct RGB { Uint8 R, G, B; };
 
 class SDL2PXS {
     int* width = new int, * height = new int;
-    int PXSize, pixelsInX, pixelsInY;
-    RGB drawColor = { 0, 0, 0 };
+    int PXSize, pixelsInX, pixelsInY, gridSize = 0; 
+    RGB drawColor, gridColor;
+    S vector<RGB> pixels;
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Surface* surface;
@@ -20,12 +21,14 @@ class SDL2PXS {
 
     void setup();
 
-    xy<float> getStartOfPixelPos(xy<int> pointPos);
+    xy<int> getStartOfPixelPos(xy<int> pointPos);
+
+    //void drawBoundariesOfGrid(xy<int> stratPointPos = { 0, 0 }, int W, int H);
 
 public:
-    SDL2PXS(int PXSize, SDL_Window* window, SDL_Renderer* renderer);
+    SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int PXSize);
 
-    SDL2PXS(int PXSize, int pixelsInX, int pixelsInY);
+    SDL2PXS(char title[], int PXSize, int pixelsInX, int pixelsInY);
 
     ~SDL2PXS();
 
@@ -43,9 +46,9 @@ public:
 
     void drawPixel(xy<int> pixelPos);
 
-    void drawRect(xy<int> point0Pos, xy<int> point1Pos);
-    
-    void drawFillRect(xy<int> point0Pos, xy<int> point1Pos);
+    void drawFillRect(xy<int> startPointPos, int W, int H);
+
+    void drawRect(xy<int> stratPointPos, int W, int H);
 
     void drawLine(xy<int> point0Pos, xy<int> point1Pos);
 
