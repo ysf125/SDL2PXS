@@ -3,36 +3,45 @@
 // private area
 
 void SDL2PXS::setup() {
-    pixels.resize(pixelsInY * pixelsInX);
-    
     if (gridSize > 0) {
         surface = SDL_CreateRGBSurface(0, *width, *height, 32, 0xff, 0xff00, 0xff0000, 0xff000000);
         Uint32 color = SDL_MapRGBA(surface->format, 0, 0, 0, 0);
         SDL_FillRect(surface, NULL, color);
-        drawBoundariesOfGrid({ 0, 0 }, pixelsInX, pixelsInY);
+        drawGrid();
         texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_FreeSurface(surface);
     }
 
+    pixels.resize(pixelsInY * pixelsInX);
     setDrawColor();
-    clearTheScreen();  
+    clearTheScreen();
 }
 
 xy<int> SDL2PXS::getStartOfPixelPos(xy<int> pointPos) {
-    int x = (pointPos.x * PXSize) + (pointPos.x * gridSize), 
+    int x = (pointPos.x * PXSize) + (pointPos.x * gridSize),
         y = (pointPos.y * PXSize) + (pointPos.y * gridSize);
     return { x, y };
 }
 
-void SDL2PXS::drawBoundariesOfGrid(xy<int> stratPointPos, int W, int H) {
-    //SDL_Rect * rect = new SDL_Rect;
-    //Uint32 color = SDL_MapRGBA(surface->format, gridColor.R, gridColor.G, gridColor.B, 255); 
+void SDL2PXS::drawGrid() {
+    SDL_Rect* rect = new SDL_Rect;
+    Uint32 color = SDL_MapRGBA(surface->format, gridColor.R, gridColor.G, gridColor.B, 255);
+
+    for (int i = 0; i < pixelsInX; i++) {
+        rect = new SDL_Rect{ (PXSize * (i + 1)) + (gridSize * i), 0, gridSize, *height };
+        SDL_FillRect(surface, rect, color);
+    }
+    for (int i = 0; i < pixelsInY; i++) {
+        rect = new SDL_Rect{ 0, (PXSize * (i + 1)) + (gridSize * i), *width, gridSize };
+        SDL_FillRect(surface, rect, color);
+    }
+    delete rect;
 }
 
 // public area
 
 SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int PXSize, int gridSize, RGB gridColor)
-    : PXSize(PXSize),gridSize(gridSize), gridColor(gridColor), window(window), renderer(renderer) {
+    : PXSize(PXSize), gridSize(gridSize), gridColor(gridColor), window(window), renderer(renderer) {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GetWindowSizeInPixels(window, width, height);
     pixelsInX = floor(*width / (PXSize + gridSize));
@@ -63,8 +72,8 @@ SDL_Window* SDL2PXS::getWindow() { return window; }
 
 SDL_Renderer* SDL2PXS::getRenderer() { return renderer; }
 
-void SDL2PXS::showChanges() { 
-    SDL_RenderPresent(renderer); 
+void SDL2PXS::showChanges() {
+    SDL_RenderPresent(renderer);
 }
 
 void SDL2PXS::setDrawColor(RGB color) {
@@ -73,7 +82,7 @@ void SDL2PXS::setDrawColor(RGB color) {
 }
 
 void SDL2PXS::clearTheScreen() {
-    SDL_RenderClear(renderer);  
+    SDL_RenderClear(renderer);
     S fill(pixels.begin(), pixels.end(), drawColor);
     if (gridSize > 0) SDL_RenderCopy(renderer, texture, NULL, NULL);
 }
@@ -85,21 +94,30 @@ RGB SDL2PXS::getPixleColor(xy<int> pixelPos) {
 
 void SDL2PXS::drawPixel(xy<int> pixelPos) {
     xy<int> stratPosInPX = getStartOfPixelPos(pixelPos);
-    SDL_Rect* rect = new SDL_Rect{stratPosInPX.x, stratPosInPX.y, PXSize, PXSize};
+    SDL_Rect* rect = new SDL_Rect{ stratPosInPX.x, stratPosInPX.y, PXSize, PXSize };
     SDL_RenderFillRect(renderer, rect);
+
     pixels[pixelPos.y * pixelsInX + pixelPos.x] = drawColor;
 }
 
 void SDL2PXS::drawFillRect(xy<int> stratPointPos, int W, int H) {
     xy<int> stratPosInPX = getStartOfPixelPos(stratPointPos);
-    int widthInPX = (W * PXSize) + (W * gridSize), heightInPX = (H * PXSize) + (H * gridSize);
-    SDL_Rect* rect = new SDL_Rect{stratPosInPX.x, stratPosInPX.y, widthInPX, heightInPX};
+    int widthInPX = (W * PXSize) + ((W - 1) * gridSize),
+        heightInPX = (H * PXSize) + ((H - 1) * gridSize);
+    SDL_Rect* rect = new SDL_Rect{ stratPosInPX.x, stratPosInPX.y, widthInPX, heightInPX };
     SDL_RenderFillRect(renderer, rect);
+
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
             pixels[(stratPointPos.y + i) * pixelsInX + (stratPointPos.x + j)] = drawColor;
         }
-    }    
+    }
+
+    if (gridSize > 0) {
+        int halfGridSize = (gridSize / 2);
+        rect = new SDL_Rect{ stratPosInPX.x - halfGridSize, stratPosInPX.y - halfGridSize, widthInPX + halfGridSize, heightInPX + halfGridSize };
+        SDL_RenderCopy(renderer, texture, rect, rect);
+    }
 }
 
 //void SDL2PXS::drawRect(xy<int> stratPointPos, int W, int H) {}
