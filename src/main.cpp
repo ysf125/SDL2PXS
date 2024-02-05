@@ -8,13 +8,14 @@ int main(int argc, char* args[]) {
 	SDL_Window* window = SDL_CreateWindow("0", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, flags);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
 
-	SDL2PXS screen = SDL2PXS(window, renderer, 7);
+	SDL2PXS screen = SDL2PXS(window, renderer, 10, 10);
 
-	screen.setDrawColor({ 0, 0, 255 });
+	screen.setDrawColor({ 128, 128, 0 });
 	screen.clearTheScreen();
 	
-	screen.setDrawColor({ 255, 0, 0 });
+	screen.setDrawColor({ 0, 0, 255 });
 	screen.drawPixel({5,3});
+	screen.drawPixel({5,4});
 	screen.drawFillRect({5,5},8,6);
 	screen.showChanges();
 
@@ -23,11 +24,10 @@ int main(int argc, char* args[]) {
 	while (!quit) {
 		SDL_PollEvent(&e);
 		switch (e.type) { case SDL_QUIT: quit = true; break; }
-
 		SDL_Delay(16);
 	}
 
-	screen.~SDL2PXS();
+	screen.closeSDL2PXS();
 
 	return 0;
 }

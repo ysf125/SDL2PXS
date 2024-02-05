@@ -23,14 +23,14 @@ class SDL2PXS {
 
     xy<int> getStartOfPixelPos(xy<int> pointPos);
 
-    //void drawBoundariesOfGrid(xy<int> stratPointPos = { 0, 0 }, int W, int H);
+    void drawBoundariesOfGrid(xy<int> stratPointPos, int W, int H);
 
 public:
-    SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int PXSize);
+    SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int PXSize, int gridSize = 0, RGB gridColor = { 128, 128, 128});
 
-    SDL2PXS(char title[], int PXSize, int pixelsInX, int pixelsInY);
+    SDL2PXS(char title[], int pixelsInX, int pixelsInY, int PXSize, int gridSize = 0, RGB gridColor = { 128, 128, 128});
 
-    ~SDL2PXS();
+    void closeSDL2PXS();
 
     SDL_Window* getWindow();
 
@@ -54,7 +54,7 @@ public:
 
     void drawCircle(xy<int> centerPos, int R);
 
-    void floodFill(xy<int> pointPos);
+    void floodFill(xy<int> startPointPos);
 };
 
 #endif
