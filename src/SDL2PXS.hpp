@@ -2,7 +2,6 @@
 #define SDL2PXS_hpp
 #include <SDL.h>
 #include <lineAlgorithm.hpp>
-#include <iostream>
 #include <vector>
 #define S std::
 

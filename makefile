@@ -1,4 +1,4 @@
-include = -I.\include\ -L.\lib\ -lmingw32 -lSDL2main -lSDL2 -llineAlgorithm 
+include = -I.\include\ -I.\src\ -L.\lib\ -L.\ -lmingw32 -lSDL2main -lSDL2 -llineAlgorithm
 flags = -std=c++20 -O3 -Wall -Werror
 
 test-all :
@@ -12,4 +12,4 @@ build-dll :
 	del "SDL2PXS.o"
 
 build-exe :
-	g++ .\src\main.cpp -o main -mwindows -L. -lSDL2PXS $(flags) $(include)
+	g++ .\src\main.cpp -o main -mwindows -lSDL2PXS $(flags) $(include)
