@@ -49,16 +49,16 @@ SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int PXSize, int gri
     : PXSize(PXSize), gridSize(gridSize), gridColor(gridColor), window(window), renderer(renderer) {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GetWindowSizeInPixels(window, width, height);
-    pixelsInX = floor(*width / (PXSize + gridSize));
-    pixelsInY = floor(*height / (PXSize + gridSize));
+    pixelsInX = floor(*width / (PXSize + gridSize)) + 1;
+    pixelsInY = floor(*height / (PXSize + gridSize)) + 1;
     setup();
 }
 
 SDL2PXS::SDL2PXS(char title[], int pixelsInX, int pixelsInY, int PXSize, int gridSize, RGB gridColor)
     : PXSize(PXSize), pixelsInX(pixelsInX), pixelsInY(pixelsInY), gridSize(gridSize), gridColor(gridColor) {
     SDL_Init(SDL_INIT_VIDEO);
-    *width = pixelsInX * (PXSize + gridSize);
-    *height = pixelsInY * (PXSize + gridSize);
+    *width = (pixelsInX * PXSize) + ((pixelsInX - 1) * gridSize);
+    *height = (pixelsInY * PXSize) + ((pixelsInY - 1) * gridSize);
     window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, *width, *height, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, 0);
     setup();
@@ -98,7 +98,7 @@ void SDL2PXS::clearTheScreen() {
 }
 
 bool SDL2PXS::notInsideTheScreen(xy<int> pixel) {
-    return (pixel.x < 0 || pixel.y < 0 || pixel.x > pixelsInX || pixel.y > pixelsInX);
+    return (pixel.x < 0 || pixel.y < 0 || pixel.x > pixelsInX || pixel.y > pixelsInY);
 }
 
 void SDL2PXS::setDrawColor(RGB color) {
@@ -120,6 +120,13 @@ void SDL2PXS::drawPixel(xy<int> pixel) {
     setPixelColor(pixel);
 }
 
+void SDL2PXS::drawRect(xy<int> startPixel, int W, int H) {
+    drawFillRect(startPixel, W, 1);
+    drawFillRect(startPixel, 1, H);
+    drawFillRect({ startPixel.x, startPixel.y + (H - 1) }, W, 1);
+    drawFillRect({ startPixel.x + (W - 1), startPixel.y }, 1, H);
+}
+
 void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
     xy<int> stratPosInPX = getStartOfPixelPos(startPixel);
     int widthInPX = (W * PXSize) + ((W - 1) * gridSize),
@@ -139,13 +146,6 @@ void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
     }
 }
 
-void SDL2PXS::drawRect(xy<int> startPixel, int W, int H) {
-    drawFillRect(startPixel, W, 1);
-    drawFillRect(startPixel, 1, H);
-    drawFillRect({ startPixel.x, startPixel.y + (H - 1) }, W, 1);
-    drawFillRect({ startPixel.x + (W - 1), startPixel.y }, 1, H);
-}
-
 void SDL2PXS::drawLine(xy<int> pixel0, xy<int> pixel1) {
     for (xy<int> point : angline(pixel0, pixel1)) drawPixel(point);
 }
@@ -153,14 +153,14 @@ void SDL2PXS::drawLine(xy<int> pixel0, xy<int> pixel1) {
 void SDL2PXS::drawCircle(xy<int> centerPixel, int R) {
     xy<int> xyTemp = { 0, R };
     S vector<xy<int>> points = { {xyTemp.x, xyTemp.y} };
-    int P = 3 - 2 * R;
+    int P = 1 - R;
 
     while (xyTemp.x <= xyTemp.y) {
         xyTemp.x++;
-        if (P < 0) { P = P + 4 * xyTemp.x + 6; }
+        if (P < 0) { P = P + 2 * xyTemp.x + 1; }
         else {
             xyTemp.y--;
-            P = P + 4 * (xyTemp.x - xyTemp.y) + 10;
+            P = P - 2 * xyTemp.y + 2 * xyTemp.x + 1;
         }
         points.push_back({ xyTemp.x, xyTemp.y });
     }
@@ -177,14 +177,28 @@ void SDL2PXS::drawCircle(xy<int> centerPixel, int R) {
     }
 }
 
-// First try !!!
+void SDL2PXS::drawFillCircle(xy<int> centerPixel, int R) {
+    drawCircle(centerPixel,R);
+    floodFill(centerPixel, getPixleColor(centerPixel));
+}
+
+// Not on the first try :(
 void SDL2PXS::floodFill(xy<int> startPixel, RGB oldColor) {
-    if (notInsideTheScreen(startPixel)) return;
-    RGB pointColor = getPixleColor(startPixel);
-    if (pointColor.R == oldColor.R && pointColor.G == oldColor.G && pointColor.B == oldColor.B) {
-        drawPixel(startPixel);
-        for (int i = 0; i < 4; i++) {
-            floodFill(movePointInGrid(startPixel, i), oldColor);
+    S stack<xy<int>> pixelsToProcess;
+    pixelsToProcess.push(startPixel);
+
+    while (pixelsToProcess.size() != 0) { 
+        xy<int> pixel = pixelsToProcess.top();
+        RGB pixelColor = getPixleColor(pixel);
+        
+        if (!(pixelColor.R == oldColor.R && pixelColor.G == oldColor.G &&
+            pixelColor.B == oldColor.B) || (notInsideTheScreen(pixel))) {
+            pixelsToProcess.pop();
+            continue;
         }
+        
+        drawPixel(pixel);
+        pixelsToProcess.pop();
+        for (int i = 0; i < 4; i++) pixelsToProcess.push(movePointInGrid(pixel, i * 2));       
     }
 }

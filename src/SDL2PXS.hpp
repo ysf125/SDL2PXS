@@ -4,6 +4,7 @@
 #include <lineAlgorithm.hpp>
 #include <vector>
 #include <string>
+#include <stack>
 #include <iostream>
 #define S std::
 
@@ -54,13 +55,15 @@ public:
 
     void drawPixel(xy<int> pixel);
 
-    void drawFillRect(xy<int> startPixel, int W, int H);
-
     void drawRect(xy<int> startPixel, int W, int H);
+    
+    void drawFillRect(xy<int> startPixel, int W, int H);
 
     void drawLine(xy<int> Pixel0, xy<int> pixel1);
 
     void drawCircle(xy<int> centerPixel, int R);
+
+    void drawFillCircle(xy<int> centerPixel, int R);
 
     void floodFill(xy<int> startPixel, RGB oldColor);
 };
