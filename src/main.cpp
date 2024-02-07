@@ -13,9 +13,7 @@ int main(int argc, char* args[]) {
 	screen.clearTheScreen();
 
 	screen.setDrawColor({255, 0, 0});
-
 	
-
 	screen.showChanges();
 
 	SDL_Event e;

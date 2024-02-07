@@ -77,6 +77,16 @@ SDL_Window* SDL2PXS::getWindow() { return window; }
 
 SDL_Renderer* SDL2PXS::getRenderer() { return renderer; }
 
+void SDL2PXS::getWidthAndHeight(int *width, int *height) {
+    *width = *this->width;
+    *height = *this->height;
+}
+
+void SDL2PXS::getPixelsInXAndY(int *pixelsInX, int *pixelsInY) {
+    *pixelsInX = this->pixelsInX;
+    *pixelsInY = this->pixelsInY;
+}
+
 void SDL2PXS::showChanges() {
     SDL_RenderPresent(renderer);
 }
@@ -88,7 +98,7 @@ void SDL2PXS::clearTheScreen() {
 }
 
 bool SDL2PXS::notInsideTheScreen(xy<int> pixel) {
-    return (pixel.x < 0 || pixel.y < 0 || pixel.x >= pixelsInX || pixel.y >= pixelsInX); 
+    return (pixel.x < 0 || pixel.y < 0 || pixel.x > pixelsInX || pixel.y > pixelsInX);
 }
 
 void SDL2PXS::setDrawColor(RGB color) {
@@ -124,13 +134,11 @@ void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
     }
 
     if (gridSize > 0) {
-        int halfGridSize = (gridSize / 2);
-        rect = new SDL_Rect{ stratPosInPX.x - halfGridSize, stratPosInPX.y - halfGridSize, widthInPX + halfGridSize, heightInPX + halfGridSize };
+        rect = new SDL_Rect{ stratPosInPX.x - gridSize, stratPosInPX.y - gridSize, widthInPX + gridSize, heightInPX + gridSize };
         SDL_RenderCopy(renderer, texture, rect, rect);
     }
 }
 
-// First try !!!
 void SDL2PXS::drawRect(xy<int> startPixel, int W, int H) {
     drawFillRect(startPixel, W, 1);
     drawFillRect(startPixel, 1, H);
@@ -142,15 +150,41 @@ void SDL2PXS::drawLine(xy<int> pixel0, xy<int> pixel1) {
     for (xy<int> point : angline(pixel0, pixel1)) drawPixel(point);
 }
 
-//void drawCircle(xy<int> centerPixel, int R) {}
+void SDL2PXS::drawCircle(xy<int> centerPixel, int R) {
+    xy<int> xyTemp = { 0, R };
+    S vector<xy<int>> points = { {xyTemp.x, xyTemp.y} };
+    int P = 3 - 2 * R;
 
+    while (xyTemp.x <= xyTemp.y) {
+        xyTemp.x++;
+        if (P < 0) { P = P + 4 * xyTemp.x + 6; }
+        else {
+            xyTemp.y--;
+            P = P + 4 * (xyTemp.x - xyTemp.y) + 10;
+        }
+        points.push_back({ xyTemp.x, xyTemp.y });
+    }
+
+    for (xy<int> point : points) {
+        drawPixel({ centerPixel.x + point.x, centerPixel.y + point.y });
+        drawPixel({ centerPixel.x - point.x, centerPixel.y + point.y });
+        drawPixel({ centerPixel.x + point.x, centerPixel.y - point.y });
+        drawPixel({ centerPixel.x - point.x, centerPixel.y - point.y });
+        drawPixel({ centerPixel.x + point.y, centerPixel.y + point.x });
+        drawPixel({ centerPixel.x - point.y, centerPixel.y + point.x });
+        drawPixel({ centerPixel.x + point.y, centerPixel.y - point.x });
+        drawPixel({ centerPixel.x - point.y, centerPixel.y - point.x });
+    }
+}
+
+// First try !!!
 void SDL2PXS::floodFill(xy<int> startPixel, RGB oldColor) {
-    if (notInsideTheScreen(startPixel)) return; 
+    if (notInsideTheScreen(startPixel)) return;
     RGB pointColor = getPixleColor(startPixel);
     if (pointColor.R == oldColor.R && pointColor.G == oldColor.G && pointColor.B == oldColor.B) {
         drawPixel(startPixel);
         for (int i = 0; i < 4; i++) {
-            floodFill(movePointInGrid(startPixel,i), oldColor);
+            floodFill(movePointInGrid(startPixel, i), oldColor);
         }
     }
 }

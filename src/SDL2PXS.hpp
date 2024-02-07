@@ -11,7 +11,7 @@ struct RGB { Uint8 R, G, B; };
 
 class SDL2PXS {
     int* width = new int, * height = new int;
-    int PXSize, pixelsInX, pixelsInY, gridSize = 0;
+    int PXSize, pixelsInX, pixelsInY, gridSize;
     RGB drawColor, gridColor;
     S vector<RGB> pixels;
     SDL_Window* window;
@@ -37,6 +37,10 @@ public:
     SDL_Window* getWindow();
 
     SDL_Renderer* getRenderer();
+
+    void getWidthAndHeight(int *width, int *height);
+
+    void getPixelsInXAndY(int *pixelsInX, int *pixelsInY);
 
     void showChanges();
 
