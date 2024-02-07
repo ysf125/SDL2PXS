@@ -3,6 +3,8 @@
 #include <SDL.h>
 #include <lineAlgorithm.hpp>
 #include <vector>
+#include <string>
+#include <iostream>
 #define S std::
 
 struct RGB { Uint8 R, G, B; };
@@ -19,7 +21,9 @@ class SDL2PXS {
 
     void setup();
 
-    xy<int> getStartOfPixelPos(xy<int> pointPos);
+    xy<int> getStartOfPixelPos(xy<int> pixel);
+
+    void setPixelColor(xy<int> pixel);
 
     void drawGrid();
 
@@ -36,23 +40,25 @@ public:
 
     void showChanges();
 
+    void clearTheScreen();
+    
+    bool notInsideTheScreen(xy<int> pixel);
+
     void setDrawColor(RGB color = { 0, 0, 0 });
 
-    void clearTheScreen();
+    RGB getPixleColor(xy<int> pixel);
 
-    RGB getPixleColor(xy<int> pixelPos);
+    void drawPixel(xy<int> pixel);
 
-    void drawPixel(xy<int> pixelPos);
+    void drawFillRect(xy<int> startPixel, int W, int H);
 
-    void drawFillRect(xy<int> startPointPos, int W, int H);
+    void drawRect(xy<int> startPixel, int W, int H);
 
-    void drawRect(xy<int> stratPointPos, int W, int H);
+    void drawLine(xy<int> Pixel0, xy<int> pixel1);
 
-    void drawLine(xy<int> point0Pos, xy<int> point1Pos);
+    void drawCircle(xy<int> centerPixel, int R);
 
-    void drawCircle(xy<int> centerPos, int R);
-
-    void floodFill(xy<int> startPointPos);
+    void floodFill(xy<int> startPixel, RGB oldColor);
 };
 
 #endif

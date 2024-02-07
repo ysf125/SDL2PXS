@@ -12,4 +12,4 @@ build-dll :
 	del "SDL2PXS.o"
 
 build-exe :
-	g++ .\src\main.cpp -o main -mwindows -lSDL2PXS $(flags) $(include)
+	g++ .\src\main.cpp -o main -lSDL2PXS $(moreFlags) $(flags) $(include)
