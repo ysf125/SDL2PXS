@@ -54,13 +54,12 @@ SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int PXSize, int gri
     setup();
 }
 
-SDL2PXS::SDL2PXS(char title[], int pixelsInX, int pixelsInY, int PXSize, int gridSize, RGB gridColor)
-    : PXSize(PXSize), pixelsInX(pixelsInX), pixelsInY(pixelsInY), gridSize(gridSize), gridColor(gridColor) {
+SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, int gridSize, RGB gridColor)
+    : PXSize(PXSize), pixelsInX(pixelsInX), pixelsInY(pixelsInY), gridSize(gridSize), gridColor(gridColor), window(window), renderer(renderer) {
     SDL_Init(SDL_INIT_VIDEO);
     *width = (pixelsInX * PXSize) + ((pixelsInX - 1) * gridSize);
     *height = (pixelsInY * PXSize) + ((pixelsInY - 1) * gridSize);
-    window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, *width, *height, SDL_WINDOW_SHOWN);
-    renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_SetWindowSize(window, *width, *height);   
     setup();
 }
 
@@ -72,10 +71,6 @@ void SDL2PXS::closeSDL2PXS() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyTexture(texture);
 }
-
-SDL_Window* SDL2PXS::getWindow() { return window; }
-
-SDL_Renderer* SDL2PXS::getRenderer() { return renderer; }
 
 void SDL2PXS::getWidthAndHeight(int *width, int *height) {
     *width = *this->width;

@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include <stack>
-#include <iostream>
 #define S std::
 
 struct RGB { Uint8 R, G, B; };
@@ -31,13 +30,9 @@ class SDL2PXS {
 public:
     SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int PXSize, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
 
-    SDL2PXS(char title[], int pixelsInX, int pixelsInY, int PXSize, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
+    SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
 
     void closeSDL2PXS();
-
-    SDL_Window* getWindow();
-
-    SDL_Renderer* getRenderer();
 
     void getWidthAndHeight(int *width, int *height);
 
