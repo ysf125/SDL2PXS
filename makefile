@@ -7,8 +7,8 @@ test-all :
 	.\main.exe
 
 build-dll :
-	g++ .\src\SDL2PXS.cpp -o SDL2PXS.o -c $(flags) $(include)
-	g++ SDL2PXS.o -o SDL2PXS.dll -shared $(flags) $(include)
+	g++ .\src\SDL2PXS.cpp -o SDL2PXS.o -c $(moreFlags) $(flags) $(include)
+	g++ SDL2PXS.o -o SDL2PXS.dll -shared $(moreFlags) $(flags) $(include)
 	del "SDL2PXS.o"
 
 build-exe :

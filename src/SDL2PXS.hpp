@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <lineAlgorithm.hpp>
 #include <vector>
+#include <memory>
 #include <string>
 #include <stack>
 #define S std::
@@ -10,7 +11,7 @@
 struct RGB { Uint8 R, G, B; };
 
 class SDL2PXS {
-    int* width = new int, * height = new int;
+    S unique_ptr<int> width = S make_unique<int>(), height = S make_unique<int>();
     int PXSize, pixelsInX, pixelsInY, gridSize;
     RGB drawColor, gridColor;
     S vector<RGB> pixels;
@@ -34,14 +35,14 @@ public:
 
     void closeSDL2PXS();
 
-    void getWidthAndHeight(int *width, int *height);
+    void getWidthAndHeight(int* width, int* height);
 
-    void getPixelsInXAndY(int *pixelsInX, int *pixelsInY);
+    void getPixelsInXAndY(int* pixelsInX, int* pixelsInY);
 
     void showChanges();
 
     void clearTheScreen();
-    
+
     bool notInsideTheScreen(xy<int> pixel);
 
     void setDrawColor(RGB color = { 0, 0, 0 });
@@ -51,7 +52,7 @@ public:
     void drawPixel(xy<int> pixel);
 
     void drawRect(xy<int> startPixel, int W, int H);
-    
+
     void drawFillRect(xy<int> startPixel, int W, int H);
 
     void drawLine(xy<int> Pixel0, xy<int> pixel1);

@@ -48,7 +48,7 @@ void SDL2PXS::drawGrid() {
 SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int PXSize, int gridSize, RGB gridColor)
     : PXSize(PXSize), gridSize(gridSize), gridColor(gridColor), window(window), renderer(renderer) {
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_GetWindowSizeInPixels(window, width, height);
+    SDL_GetWindowSizeInPixels(window, width.get(), height.get());
     pixelsInX = floor(*width / (PXSize + gridSize)) + 1;
     pixelsInY = floor(*height / (PXSize + gridSize)) + 1;
     setup();
@@ -65,8 +65,6 @@ SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int 
 
 void SDL2PXS::closeSDL2PXS() {
     SDL_Quit();
-    delete width;
-    delete height;
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyTexture(texture);
