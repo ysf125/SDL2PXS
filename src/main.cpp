@@ -15,7 +15,7 @@ int main(int argc, char* args[]) {
 	Uint32 flags = SDL_WINDOW_SHOWN;
 	SDL_Window* window = SDL_CreateWindow("SDL2PXS snake game test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, flags);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-	SDL2PXS screen = SDL2PXS(window, renderer, 40, 30, 15, 2, { 128, 128, 128 });
+	SDL2PXS screen = SDL2PXS(window, renderer, 40, 30, 15, resizeTheScreen, 2, { 128, 128, 128 });
 
 	screen.setDrawColor();
 	screen.clearTheScreen();
@@ -40,10 +40,10 @@ int main(int argc, char* args[]) {
 
 		case SDL_KEYDOWN:
 			switch (e.key.keysym.sym) {
-			case SDLK_RIGHT: movingDirection = 0; break;
-			case SDLK_DOWN: movingDirection = 2; break;
-			case SDLK_LEFT: movingDirection = 4; break;
-			case SDLK_UP: movingDirection = 6; break;
+			case SDLK_RIGHT: movingDirection = movingDirection == 4 ? 4 : 0; break;
+			case SDLK_DOWN: movingDirection = movingDirection == 6 ? 6 : 2; break;
+			case SDLK_LEFT: movingDirection = movingDirection == 0 ? 0 : 4; break;
+			case SDLK_UP: movingDirection = movingDirection == 2 ? 2 : 6; break;
 			} break;
 		}
 

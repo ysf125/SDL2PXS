@@ -3,10 +3,13 @@
 #include <SDL.h>
 #include <lineAlgorithm.hpp>
 #include <vector>
+#include <cmath>
 #include <memory>
 #include <string>
 #include <stack>
 #define S std::
+
+enum options { none = 0, resizeTheScreen = 1 };
 
 struct RGB { Uint8 R, G, B; };
 
@@ -14,6 +17,7 @@ class SDL2PXS {
     S unique_ptr<int> width = S make_unique<int>(), height = S make_unique<int>();
     int PXSize, pixelsInX, pixelsInY, gridSize;
     RGB drawColor, gridColor;
+    options PXSOptions;
     S vector<RGB> pixels;
     SDL_Window* window;
     SDL_Renderer* renderer;
@@ -29,9 +33,7 @@ class SDL2PXS {
     void drawGrid();
 
 public:
-    SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int PXSize, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
-
-    SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
+    SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions = none, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
 
     void closeSDL2PXS();
 

@@ -1,8 +1,12 @@
 #include "SDL2PXS.hpp"
 
 // private area
-
 void SDL2PXS::setup() {
+    if ((PXSOptions & resizeTheScreen) == resizeTheScreen) {
+        *width = (pixelsInX * PXSize) + ((pixelsInX - 1) * gridSize);
+        *height = (pixelsInY * PXSize) + ((pixelsInY - 1) * gridSize);
+        SDL_SetWindowSize(window, *width, *height);
+    }
     if (gridSize > 0) {
         surface = SDL_CreateRGBSurface(0, *width, *height, 32, 0xff, 0xff00, 0xff0000, 0xff000000);
         Uint32 color = SDL_MapRGBA(surface->format, 0, 0, 0, 0);
@@ -44,22 +48,12 @@ void SDL2PXS::drawGrid() {
 }
 
 // public area
-
-SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int PXSize, int gridSize, RGB gridColor)
-    : PXSize(PXSize), gridSize(gridSize), gridColor(gridColor), window(window), renderer(renderer) {
+SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions, int gridSize, RGB gridColor)
+    : PXSize(PXSize), pixelsInX(pixelsInX), pixelsInY(pixelsInY), gridSize(gridSize), gridColor(gridColor), PXSOptions(PXSOptions), window(window), renderer(renderer) {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GetWindowSizeInPixels(window, width.get(), height.get());
-    pixelsInX = floor(*width / (PXSize + gridSize)) + 1;
-    pixelsInY = floor(*height / (PXSize + gridSize)) + 1;
-    setup();
-}
-
-SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, int gridSize, RGB gridColor)
-    : PXSize(PXSize), pixelsInX(pixelsInX), pixelsInY(pixelsInY), gridSize(gridSize), gridColor(gridColor), window(window), renderer(renderer) {
-    SDL_Init(SDL_INIT_VIDEO);
-    *width = (pixelsInX * PXSize) + ((pixelsInX - 1) * gridSize);
-    *height = (pixelsInY * PXSize) + ((pixelsInY - 1) * gridSize);
-    SDL_SetWindowSize(window, *width, *height);   
+    if (pixelsInX <= 0) this->pixelsInX = ceil(*width / (PXSize + gridSize));
+    if (pixelsInY <= 0) this->pixelsInY = ceil(*height / (PXSize + gridSize));
     setup();
 }
 
@@ -70,12 +64,12 @@ void SDL2PXS::closeSDL2PXS() {
     SDL_DestroyTexture(texture);
 }
 
-void SDL2PXS::getWidthAndHeight(int *width, int *height) {
+void SDL2PXS::getWidthAndHeight(int* width, int* height) {
     *width = *this->width;
     *height = *this->height;
 }
 
-void SDL2PXS::getPixelsInXAndY(int *pixelsInX, int *pixelsInY) {
+void SDL2PXS::getPixelsInXAndY(int* pixelsInX, int* pixelsInY) {
     *pixelsInX = this->pixelsInX;
     *pixelsInY = this->pixelsInY;
 }
@@ -171,7 +165,7 @@ void SDL2PXS::drawCircle(xy<int> centerPixel, int R) {
 }
 
 void SDL2PXS::drawFillCircle(xy<int> centerPixel, int R) {
-    drawCircle(centerPixel,R);
+    drawCircle(centerPixel, R);
     floodFill(centerPixel, getPixleColor(centerPixel));
 }
 
@@ -180,18 +174,18 @@ void SDL2PXS::floodFill(xy<int> startPixel, RGB oldColor) {
     S stack<xy<int>> pixelsToProcess;
     pixelsToProcess.push(startPixel);
 
-    while (pixelsToProcess.size() != 0) { 
+    while (pixelsToProcess.size() != 0) {
         xy<int> pixel = pixelsToProcess.top();
         RGB pixelColor = getPixleColor(pixel);
-        
+
         if (!(pixelColor.R == oldColor.R && pixelColor.G == oldColor.G &&
             pixelColor.B == oldColor.B) || (notInsideTheScreen(pixel))) {
             pixelsToProcess.pop();
             continue;
         }
-        
+
         drawPixel(pixel);
         pixelsToProcess.pop();
-        for (int i = 0; i < 4; i++) pixelsToProcess.push(movePointInGrid(pixel, i * 2));       
+        for (int i = 0; i < 4; i++) pixelsToProcess.push(movePointInGrid(pixel, i * 2));
     }
 }
