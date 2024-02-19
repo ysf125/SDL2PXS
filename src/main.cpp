@@ -15,8 +15,8 @@ int main(int argc, char* args[]) {
 	Uint32 flags = SDL_WINDOW_SHOWN;
 	SDL_Window* window = SDL_CreateWindow("SDL2PXS snake game test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, flags);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-	SDL2PXS screen = SDL2PXS(window, renderer, 40, 30, 15, resizeTheScreen, 2, { 128, 128, 128 });
-
+	SDL2PXS screen = SDL2PXS(window, renderer, 40, 30, 15, noOverflow, 2, { 128, 128, 128 });
+	
 	screen.setDrawColor();
 	screen.clearTheScreen();
 	screen.showChanges();
@@ -47,6 +47,7 @@ int main(int argc, char* args[]) {
 			} break;
 		}
 
+		// Makes the game more fun (I know that i don't have a better description)
 		SDL_Delay(16);
 		if (loop == 4) loop = 0; else { loop++; continue; }
 
@@ -63,8 +64,8 @@ int main(int argc, char* args[]) {
 		snake.erase(snake.begin());
 
 		screen.showChanges();
-
-		// logic for the game
+	
+		// Logic for the game
 		if (isPixelOnTop(snake[snake.size() - 1], food)) {
 			snake.insert(snake.begin(), { -1, -1 });
 			while (true) {

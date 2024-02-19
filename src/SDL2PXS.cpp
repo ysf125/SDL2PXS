@@ -2,7 +2,7 @@
 
 // private area
 void SDL2PXS::setup() {
-    if ((PXSOptions & resizeTheScreen) == resizeTheScreen) {
+    if ((PXSOptions & noOverflow) == noOverflow) {
         *width = (pixelsInX * PXSize) + ((pixelsInX - 1) * gridSize);
         *height = (pixelsInY * PXSize) + ((pixelsInY - 1) * gridSize);
         SDL_SetWindowSize(window, *width, *height);
@@ -33,18 +33,17 @@ void SDL2PXS::setPixelColor(xy<int> pixel) {
 }
 
 void SDL2PXS::drawGrid() {
-    SDL_Rect* rect = new SDL_Rect;
+    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>();
     Uint32 color = SDL_MapRGBA(surface->format, gridColor.R, gridColor.G, gridColor.B, 255);
 
     for (int i = 0; i < pixelsInX; i++) {
-        rect = new SDL_Rect{ (PXSize * (i + 1)) + (gridSize * i), 0, gridSize, *height };
-        SDL_FillRect(surface, rect, color);
+        *rect = { (PXSize * (i + 1)) + (gridSize * i), 0, gridSize, *height };
+        SDL_FillRect(surface, rect.get(), color);
     }
     for (int i = 0; i < pixelsInY; i++) {
-        rect = new SDL_Rect{ 0, (PXSize * (i + 1)) + (gridSize * i), *width, gridSize };
-        SDL_FillRect(surface, rect, color);
+        *rect = SDL_Rect{ 0, (PXSize * (i + 1)) + (gridSize * i), *width, gridSize };
+        SDL_FillRect(surface, rect.get(), color);
     }
-    delete rect;
 }
 
 // public area
@@ -101,8 +100,8 @@ RGB SDL2PXS::getPixleColor(xy<int> pixel) {
 
 void SDL2PXS::drawPixel(xy<int> pixel) {
     xy<int> stratPosInPX = getStartOfPixelPos(pixel);
-    SDL_Rect* rect = new SDL_Rect{ stratPosInPX.x, stratPosInPX.y, PXSize, PXSize };
-    SDL_RenderFillRect(renderer, rect);
+    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(stratPosInPX.x, stratPosInPX.y, PXSize, PXSize);
+    SDL_RenderFillRect(renderer, rect.get());
 
     setPixelColor(pixel);
 }
@@ -118,8 +117,8 @@ void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
     xy<int> stratPosInPX = getStartOfPixelPos(startPixel);
     int widthInPX = (W * PXSize) + ((W - 1) * gridSize),
         heightInPX = (H * PXSize) + ((H - 1) * gridSize);
-    SDL_Rect* rect = new SDL_Rect{ stratPosInPX.x, stratPosInPX.y, widthInPX, heightInPX };
-    SDL_RenderFillRect(renderer, rect);
+    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(stratPosInPX.x, stratPosInPX.y, widthInPX, heightInPX);
+    SDL_RenderFillRect(renderer, rect.get());
 
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
@@ -128,8 +127,8 @@ void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
     }
 
     if (gridSize > 0) {
-        rect = new SDL_Rect{ stratPosInPX.x - gridSize, stratPosInPX.y - gridSize, widthInPX + gridSize, heightInPX + gridSize };
-        SDL_RenderCopy(renderer, texture, rect, rect);
+        *rect = SDL_Rect{ stratPosInPX.x - gridSize, stratPosInPX.y - gridSize, widthInPX + gridSize, heightInPX + gridSize };
+        SDL_RenderCopy(renderer, texture, rect.get(), rect.get());
     }
 }
 
@@ -178,8 +177,7 @@ void SDL2PXS::floodFill(xy<int> startPixel, RGB oldColor) {
         xy<int> pixel = pixelsToProcess.top();
         RGB pixelColor = getPixleColor(pixel);
 
-        if (!(pixelColor.R == oldColor.R && pixelColor.G == oldColor.G &&
-            pixelColor.B == oldColor.B) || (notInsideTheScreen(pixel))) {
+        if (!(pixelColor.R == oldColor.R && pixelColor.G == oldColor.G && pixelColor.B == oldColor.B) || (notInsideTheScreen(pixel))) {
             pixelsToProcess.pop();
             continue;
         }

@@ -9,7 +9,7 @@
 #include <stack>
 #define S std::
 
-enum options { none = 0, resizeTheScreen = 1 };
+enum options { none = 0, noOverflow = 1 };
 
 struct RGB { Uint8 R, G, B; };
 
