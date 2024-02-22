@@ -12,11 +12,11 @@ void SDL2PXS::setup() {
         Uint32 color = SDL_MapRGBA(surface->format, 0, 0, 0, 0);
         SDL_FillRect(surface, NULL, color);
         drawGrid();
-        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        gridTexture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_FreeSurface(surface);
     }
 
-    pixels.resize(pixelsInY * pixelsInX);
+    pixels.resize(pixelsInX * pixelsInY);
     setDrawColor();
     clearTheScreen();
 }
@@ -29,12 +29,12 @@ xy<int> SDL2PXS::getStartOfPixelPos(xy<int> pixel) {
 
 void SDL2PXS::setPixelColor(xy<int> pixel) {
     if (notInsideTheScreen(pixel)) return;
-    pixels[pixel.y * pixelsInX + pixel.x] = drawColor;
+    pixels[(pixel.y * pixelsInY) + pixel.x] = drawColor;
 }
 
 void SDL2PXS::drawGrid() {
     S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>();
-    Uint32 color = SDL_MapRGBA(surface->format, gridColor.R, gridColor.G, gridColor.B, 255);
+    Uint32 color = SDL_MapRGB(surface->format, gridColor.R, gridColor.G, gridColor.B);
 
     for (int i = 0; i < pixelsInX; i++) {
         *rect = { (PXSize * (i + 1)) + (gridSize * i), 0, gridSize, *height };
@@ -56,11 +56,17 @@ SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int 
     setup();
 }
 
+void SDL2PXS::handleWindowEvents(SDL_Event& event) {
+    switch (event.type) {
+    case SDL_QUIT: closeSDL2PXS(); break;
+    }
+}
+
 void SDL2PXS::closeSDL2PXS() {
     SDL_Quit();
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
-    SDL_DestroyTexture(texture);
+    SDL_DestroyTexture(gridTexture);
 }
 
 void SDL2PXS::getWidthAndHeight(int* width, int* height) {
@@ -73,14 +79,12 @@ void SDL2PXS::getPixelsInXAndY(int* pixelsInX, int* pixelsInY) {
     *pixelsInY = this->pixelsInY;
 }
 
-void SDL2PXS::showChanges() {
-    SDL_RenderPresent(renderer);
-}
+void SDL2PXS::showChanges() { SDL_RenderPresent(renderer); }
 
 void SDL2PXS::clearTheScreen() {
     SDL_RenderClear(renderer);
     S fill(pixels.begin(), pixels.end(), drawColor);
-    if (gridSize > 0) SDL_RenderCopy(renderer, texture, NULL, NULL);
+    if (gridSize > 0) SDL_RenderCopy(renderer, gridTexture, NULL, NULL);
 }
 
 bool SDL2PXS::notInsideTheScreen(xy<int> pixel) {
@@ -94,8 +98,7 @@ void SDL2PXS::setDrawColor(RGB color) {
 
 RGB SDL2PXS::getPixleColor(xy<int> pixel) {
     if (notInsideTheScreen(pixel)) return { 0, 0, 0 };
-    RGB color = pixels[(pixel.y * pixelsInX) + pixel.x];
-    return color;
+    return pixels[(pixel.y * pixelsInY) + pixel.x];
 }
 
 void SDL2PXS::drawPixel(xy<int> pixel) {
@@ -121,14 +124,14 @@ void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
     SDL_RenderFillRect(renderer, rect.get());
 
     for (int i = 0; i < H; i++) {
-        for (int j = 0; j < W; j++) {
-            setPixelColor({ startPixel.x + j, startPixel.y + i });
+        for (int j = 0; j < W; j++) {   
+            setPixelColor({ startPixel.x + j, startPixel.y + i });            
         }
     }
 
     if (gridSize > 0) {
         *rect = SDL_Rect{ stratPosInPX.x - gridSize, stratPosInPX.y - gridSize, widthInPX + gridSize, heightInPX + gridSize };
-        SDL_RenderCopy(renderer, texture, rect.get(), rect.get());
+        SDL_RenderCopy(renderer, gridTexture, rect.get(), rect.get());
     }
 }
 

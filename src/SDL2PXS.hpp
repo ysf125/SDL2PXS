@@ -2,6 +2,7 @@
 #define SDL2PXS_hpp
 #include <SDL.h>
 #include <lineAlgorithm.hpp>
+#include <iostream>
 #include <vector>
 #include <cmath>
 #include <memory>
@@ -22,7 +23,7 @@ class SDL2PXS {
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Surface* surface;
-    SDL_Texture* texture;
+    SDL_Texture* gridTexture;
 
     void setup();
 
@@ -34,6 +35,8 @@ class SDL2PXS {
 
 public:
     SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions = none, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
+
+    void handleWindowEvents(SDL_Event &event);
 
     void closeSDL2PXS();
 
