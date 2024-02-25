@@ -56,12 +56,6 @@ SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int 
     setup();
 }
 
-void SDL2PXS::handleWindowEvents(SDL_Event& event) {
-    switch (event.type) {
-    case SDL_QUIT: closeSDL2PXS(); break;
-    }
-}
-
 void SDL2PXS::closeSDL2PXS() {
     SDL_Quit();
     SDL_DestroyWindow(window);

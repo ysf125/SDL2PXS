@@ -6,7 +6,6 @@
 #include <vector>
 #include <cmath>
 #include <memory>
-#include <string>
 #include <stack>
 #define S std::
 
@@ -35,8 +34,6 @@ class SDL2PXS {
 
 public:
     SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions = none, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
-
-    void handleWindowEvents(SDL_Event &event);
 
     void closeSDL2PXS();
 

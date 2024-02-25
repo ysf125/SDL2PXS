@@ -12,11 +12,11 @@ int main(int argc, char* args[]) {
 
 	// Setup for SDL2PXS
 	SDL_Init(SDL_INIT_VIDEO);
-	Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
-	options PXSflags = (options)(noOverflow);
+	Uint32 flags = SDL_WINDOW_SHOWN;
+	options PXSflags = noOverflow;
 	SDL_Window* window = SDL_CreateWindow("SDL2PXS snake game test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, flags);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-	SDL2PXS screen = SDL2PXS(window, renderer, -1, -1, 15, PXSflags, 2, { 128, 128, 128 });
+	SDL2PXS screen = SDL2PXS(window, renderer, 60, 45, 15, PXSflags);
 	
 	screen.setDrawColor();
 	screen.clearTheScreen();
@@ -36,8 +36,8 @@ int main(int argc, char* args[]) {
 
 	while (!quit) {
 		SDL_PollEvent(&e);
-		screen.handleWindowEvents(e);
 		switch (e.type) {
+		case SDL_QUIT: quit = true ; break;
 		case SDL_KEYDOWN:
 			switch (e.key.keysym.sym) {
 			case SDLK_RIGHT: movingDirection = movingDirection == 4 ? 4 : 0; break;
@@ -47,7 +47,7 @@ int main(int argc, char* args[]) {
 			} break;
 		}
 
-		// Makes the game more fun (I know that i don't have a better description)
+		// Makes the game more esay and fun
 		SDL_Delay(16);
 		if (loop == 4) loop = 0; else { loop++; continue; }
 
