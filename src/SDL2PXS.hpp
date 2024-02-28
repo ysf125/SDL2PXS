@@ -34,6 +34,8 @@ class SDL2PXS {
 
     void setPixelColor(xy<int> pixel);
 
+    void correctNegativeWH(xy<int>& startPixel, int& W, int& H);
+
     void drawGrid();
 
 public:
@@ -41,9 +43,9 @@ public:
 
     void closeSDL2PXS();
 
-    void getWidthAndHeight(int* width, int* height);
+    void getWidthAndHeight(int& W, int& H);
 
-    void getPixelsInXAndY(int* pixelsInX, int* pixelsInY);
+    void getPixelsInXAndY(int& pixelsInX, int& pixelsInY);
 
     void showChanges();
 
@@ -54,6 +56,10 @@ public:
     void setDrawColor(RGB color = { 0, 0, 0 });
 
     RGB getPixleColor(xy<int> pixel);
+
+    plane2D copy(xy<int> startPixel, int W, int H); // Not added yet
+
+    void paste(plane2D& plane, SDL_Rect src, SDL_Rect dst); // Not added yet
 
     void drawPixel(xy<int> pixel);
 

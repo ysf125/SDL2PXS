@@ -17,18 +17,16 @@ int main(int argc, char* args[]) {
 	SDL_Window* window = SDL_CreateWindow("SDL2PXS snake game test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, flags);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
 	SDL2PXS screen = SDL2PXS(window, renderer, 60, 45, 15, PXSflags);
-	
-	screen.setDrawColor();
-	screen.clearTheScreen();
+
 	screen.showChanges();
 
 	// Variables for the game
-	int* pixelsInX = new int, * pixelsInY = new int;
+	int pixelsInX, pixelsInY;
 	screen.getPixelsInXAndY(pixelsInX, pixelsInY);
 	int loop = 0;
 	int movingDirection = 0;
-	xy<int> food = { randomInt(0 , *pixelsInX - 2), randomInt(0 , *pixelsInY - 2) };
-	S vector<xy<int>> snake = { { (int)floor(*pixelsInX / 2), (int)floor(*pixelsInY / 2) } };
+	xy<int> food = { randomInt(0 , pixelsInX - 2), randomInt(0 , pixelsInY - 2) };
+	S vector<xy<int>> snake = { { (int)floor(pixelsInX / 2), (int)floor(pixelsInY / 2) } };
 
 	// Game loop 
 	SDL_Event e;
@@ -69,7 +67,7 @@ int main(int argc, char* args[]) {
 		if (isPixelOnTop(snake[snake.size() - 1], food)) {
 			snake.insert(snake.begin(), { -1, -1 });
 			while (true) {
-				food = { randomInt(0 , *pixelsInX - 1), randomInt(0 , *pixelsInY - 1) };
+				food = { randomInt(0 , pixelsInX - 1), randomInt(0 , pixelsInY - 1) };
 				if (screen.getPixleColor(food).G != 255) break;
 			}
 		}

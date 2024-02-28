@@ -32,6 +32,11 @@ void SDL2PXS::setPixelColor(xy<int> pixel) {
     PXSplane.pixels[(pixel.y * PXSplane.pixelsInY) + pixel.x] = drawColor;
 }
 
+void SDL2PXS::correctNegativeWH(xy<int>& startPixel, int& W, int& H) {
+    if (W < 0) { startPixel.x += (W + 1); W = abs(W); }
+    if (H < 0) { startPixel.y += (H + 1); H = abs(H); }
+}
+
 void SDL2PXS::drawGrid() {
     S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>();
     Uint32 color = SDL_MapRGB(surface->format, gridColor.R, gridColor.G, gridColor.B);
@@ -48,7 +53,7 @@ void SDL2PXS::drawGrid() {
 
 // public area
 SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions, int gridSize, RGB gridColor)
-    : PXSize(PXSize), gridSize(gridSize), gridColor(gridColor), PXSOptions(PXSOptions), PXSplane({pixelsInX, pixelsInY}), window(window), renderer(renderer) {
+    : PXSize(PXSize), gridSize(gridSize), gridColor(gridColor), PXSOptions(PXSOptions), PXSplane({ pixelsInX, pixelsInY }), window(window), renderer(renderer) {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GetWindowSizeInPixels(window, width.get(), height.get());
     if (pixelsInX <= 0) this->PXSplane.pixelsInX = ceil(*width / (PXSize + gridSize));
@@ -63,14 +68,14 @@ void SDL2PXS::closeSDL2PXS() {
     SDL_DestroyTexture(gridTexture);
 }
 
-void SDL2PXS::getWidthAndHeight(int* width, int* height) {
-    *width = *this->width;
-    *height = *this->height;
+void SDL2PXS::getWidthAndHeight(int& W, int& H) {
+    W = *this->width;
+    H = *this->height;
 }
 
-void SDL2PXS::getPixelsInXAndY(int* pixelsInX, int* pixelsInY) {
-    *pixelsInX = this->PXSplane.pixelsInX;
-    *pixelsInY = this->PXSplane.pixelsInY;
+void SDL2PXS::getPixelsInXAndY(int& pixelsInX, int& pixelsInY) {
+    pixelsInX = this->PXSplane.pixelsInX;
+    pixelsInY = this->PXSplane.pixelsInY;
 }
 
 void SDL2PXS::showChanges() { SDL_RenderPresent(renderer); }
@@ -104,8 +109,7 @@ void SDL2PXS::drawPixel(xy<int> pixel) {
 }
 
 void SDL2PXS::drawRect(xy<int> startPixel, int W, int H) {
-    if (W < 0) { startPixel.x += (W + 1); W = abs(W); }
-    if (H < 0) { startPixel.y += (H + 1); H = abs(H); }
+    correctNegativeWH(startPixel, W, H);
 
     drawFillRect(startPixel, W, 1);
     drawFillRect(startPixel, 1, H);
@@ -114,8 +118,7 @@ void SDL2PXS::drawRect(xy<int> startPixel, int W, int H) {
 }
 
 void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
-    if (W < 0) { startPixel.x += (W + 1); W = abs(W); }
-    if (H < 0) { startPixel.y += (H + 1); H = abs(H); }
+    correctNegativeWH(startPixel, W, H);
 
     xy<int> stratPosInPX = getStartOfPixelPos(startPixel);
     int widthInPX = (W * PXSize) + ((W - 1) * gridSize),
@@ -124,8 +127,8 @@ void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
     SDL_RenderFillRect(renderer, rect.get());
 
     for (int i = 0; i < H; i++) {
-        for (int j = 0; j < W; j++) {   
-            setPixelColor({ startPixel.x + j, startPixel.y + i });            
+        for (int j = 0; j < W; j++) {
+            setPixelColor({ startPixel.x + j, startPixel.y + i });
         }
     }
 
