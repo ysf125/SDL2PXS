@@ -12,13 +12,17 @@
 enum options { none = 0, noOverflow = 1 };
 
 struct RGB { Uint8 R, G, B; };
+struct plane2D {
+    int pixelsInX, pixelsInY;
+    S vector<RGB> pixels;
+};
 
 class SDL2PXS {
     S unique_ptr<int> width = S make_unique<int>(), height = S make_unique<int>();
-    int PXSize, pixelsInX, pixelsInY, gridSize;
+    int PXSize, gridSize;
     RGB drawColor, gridColor;
     options PXSOptions;
-    S vector<RGB> pixels;
+    plane2D PXSplane;
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Surface* surface;

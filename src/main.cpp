@@ -47,7 +47,7 @@ int main(int argc, char* args[]) {
 			} break;
 		}
 
-		// Makes the game more esay and fun
+		// Makes the game playable
 		SDL_Delay(16);
 		if (loop == 4) loop = 0; else { loop++; continue; }
 
