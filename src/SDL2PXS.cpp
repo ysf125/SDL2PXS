@@ -172,11 +172,10 @@ void SDL2PXS::drawCircle(xy<int> centerPixel, int R) {
 
 void SDL2PXS::drawFillCircle(xy<int> centerPixel, int R) {
     drawCircle(centerPixel, R);
-    floodFill(centerPixel, getPixleColor(centerPixel));
+    fill(centerPixel, getPixleColor(centerPixel));
 }
 
-// Not on the first try :(
-void SDL2PXS::floodFill(xy<int> startPixel, RGB oldColor) {
+void SDL2PXS::fill(xy<int> startPixel, RGB oldColor) {
     S stack<xy<int>> pixelsToProcess;
     pixelsToProcess.push(startPixel);
 
