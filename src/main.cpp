@@ -13,10 +13,9 @@ int main(int argc, char* args[]) {
 	// Setup for SDL2PXS
 	SDL_Init(SDL_INIT_VIDEO);
 	Uint32 flags = SDL_WINDOW_SHOWN;
-	options PXSflags = noOverflow;
 	SDL_Window* window = SDL_CreateWindow("SDL2PXS snake game test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, flags);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-	SDL2PXS screen = SDL2PXS(window, renderer, 60, 45, 15, PXSflags);
+	SDL2PXS screen = SDL2PXS(window, renderer, 60, 45, 15, noOverflow);
 
 	screen.showChanges();
 
@@ -35,7 +34,7 @@ int main(int argc, char* args[]) {
 	while (!quit) {
 		SDL_PollEvent(&e);
 		switch (e.type) {
-		case SDL_QUIT: quit = true ; break;
+		case SDL_QUIT: quit = true; break;
 		case SDL_KEYDOWN:
 			switch (e.key.keysym.sym) {
 			case SDLK_RIGHT: movingDirection = movingDirection == 4 ? 4 : 0; break;
@@ -74,7 +73,7 @@ int main(int argc, char* args[]) {
 
 		if (screen.notInsideTheScreen(snake[snake.size() - 1])) quit = true;
 
-		for (uint64_t i = 0; i < snake.size() - 1; i++) {
+		for (Uint64 i = 0; i < snake.size() - 1; i++) {
 			if (isPixelOnTop(snake[i], snake[snake.size() - 1])) quit = true;
 		}
 	}

@@ -4,6 +4,7 @@
 #include <lineAlgorithm.hpp>
 #include <iostream>
 #include <vector>
+#include <string>
 #include <cmath>
 #include <memory>
 #include <stack>
@@ -41,18 +42,18 @@ class SDL2PXS {
 public:
     SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions = none, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
 
-    SDL2PXS(char windowTitle[], int pixelsInX, int pixelsInY, int PXSize, options PXSOptions = none, int gridSize = 0, RGB gridColor = { 0, 0, 0 }); // Not added yet
+    SDL2PXS(S string windowTitle, int W, int H, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions = none, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
 
-    //
+    // You can call this method when you finish using SDL2PXS 
     void closeSDL2PXS();
 
-    //
+    // Returns width and height in real pixels  
     void getWidthAndHeight(int& W, int& H);
 
-    //
+    // Returns the number of pixels in the x-axis and y-axis
     void getPixelsInXAndY(int& pixelsInX, int& pixelsInY);
 
-    //
+    // Shows whatever is drawn to the screen 
     void showChanges();
 
     // Clears the entire screen with one color and draws the grid if grid size > 0 
@@ -67,17 +68,17 @@ public:
     // Returns RGB color for a pixel on the screen
     RGB getPixleColor(xy<int> pixel);
 
-    // Not added yet 
+    // Copies a rectangle of pixels from the screen to plane2D struct
     plane2D copyFromScreen(xy<int> startPixel, int W, int H);
-    
-    // Not added yet
+
+    // Copies a rectangle of pixels from plane2D struct to the screen
     plane2D copyFromPlane(plane2D& plane, xy<int> startPixel, int W, int H);
 
-    // Not added yet
-    void pasteToScreen(plane2D& plane, SDL_Rect& src, SDL_Rect& dst); 
+    // Pastes a rectangle of pixels from plane2D struct to the screen
+    void pasteToScreen(plane2D& plane, SDL_Rect& src, SDL_Rect& dst);
 
-    // Not added yet
-    void pasteToPlane(plane2D& srcPlane, plane2D& dstPlane, SDL_Rect& src, SDL_Rect& dst); 
+    // Pastes a rectangle of pixels from plane2D struct to another plane2D struct 
+    void pasteToPlane(plane2D& srcPlane, plane2D& dstPlane, SDL_Rect& src, SDL_Rect& dst);
 
     // Draws a pixel to the screen
     void drawPixel(xy<int> pixel);

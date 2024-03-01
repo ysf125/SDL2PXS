@@ -1,6 +1,6 @@
 #include "SDL2PXS.hpp"
 
-// private area
+// Private area
 void SDL2PXS::setup() {
     if ((PXSOptions & noOverflow) == noOverflow) {
         *width = (PXSplane.pixelsInX * PXSize) + ((PXSplane.pixelsInX - 1) * gridSize);
@@ -51,15 +51,26 @@ void SDL2PXS::drawGrid() {
     }
 }
 
-// public area
+// Public area
 SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions, int gridSize, RGB gridColor)
     : PXSize(PXSize), gridSize(gridSize), gridColor(gridColor), PXSOptions(PXSOptions), PXSplane({ pixelsInX, pixelsInY }), window(window), renderer(renderer) {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GetWindowSizeInPixels(window, width.get(), height.get());
-    if (pixelsInX <= 0) this->PXSplane.pixelsInX = ceil(*width / (PXSize + gridSize));
-    if (pixelsInY <= 0) this->PXSplane.pixelsInY = ceil(*height / (PXSize + gridSize));
+    if (pixelsInX <= 0) PXSplane.pixelsInX = ceil(*width / (PXSize + gridSize));
+    if (pixelsInY <= 0) PXSplane.pixelsInY = ceil(*height / (PXSize + gridSize));
     setup();
 }
+
+SDL2PXS::SDL2PXS(S string windowTitle, int W, int H, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions, int gridSize, RGB gridColor)
+    : PXSize(PXSize), gridSize(gridSize), gridColor(gridColor), PXSOptions(PXSOptions), PXSplane({ pixelsInX, pixelsInY }) {
+        SDL_Init(SDL_INIT_VIDEO);
+        *this->width = W; *this->height = H;
+        if (pixelsInX <= 0) PXSplane.pixelsInX = ceil(W / (PXSize + gridSize));
+        if (pixelsInY <= 0) PXSplane.pixelsInY = ceil(H / (PXSize + gridSize));
+        this->window = SDL_CreateWindow(windowTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H, 0);
+        this->renderer = SDL_CreateRenderer(window, -1, 0);
+        setup();
+}    
 
 void SDL2PXS::closeSDL2PXS() {
     SDL_Quit();
