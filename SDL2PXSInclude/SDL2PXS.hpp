@@ -56,13 +56,13 @@ public:
     // Shows whatever is drawn to the screen 
     void showChanges();
 
-    // Clears the entire screen with one color and draws the grid if grid size > 0 
+    // Clears the entire screen and draws the grid if grid size > 0 
     void clearTheScreen();
 
     // Returns true if the given pixel isn't inside the screen
     bool notInsideTheScreen(xy<int> pixel);
 
-    // Sets the color for anything that can be drawn to the screen
+    // Sets the color for anything that can draw to the screen
     void setDrawColor(RGB color = { 0, 0, 0 });
 
     // Returns RGB color for a pixel on the screen

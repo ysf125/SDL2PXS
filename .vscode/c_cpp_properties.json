@@ -4,7 +4,9 @@
             "name": "Win32",
             "includePath": [
                 "${default}",
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/",
+                "${workspaceFolder}/SDL2PXSInclude/"
             ],
             "defines": [
                 "_DEBUG",
