@@ -6,11 +6,11 @@ void SDL2PXS::drawGrid() {
     Uint32 color = SDL_MapRGB(surface->format, gridColor.R, gridColor.G, gridColor.B);
 
     for (int i = 0; i < PXSplane.pixelsInX; i++) {
-        *rect = { (PXSize * (i + 1)) + (gridSize * i), 0, gridSize, *height };
+        *rect = { (PXSize * (i + 1)) + (gridSize * i), 0, gridSize, height };
         SDL_FillRect(surface, rect.get(), color);
     }
     for (int i = 0; i < PXSplane.pixelsInY; i++) {
-        *rect = SDL_Rect{ 0, (PXSize * (i + 1)) + (gridSize * i), *width, gridSize };
+        *rect = SDL_Rect{ 0, (PXSize * (i + 1)) + (gridSize * i), width, gridSize };
         SDL_FillRect(surface, rect.get(), color);
     }
 }
@@ -23,8 +23,8 @@ void SDL2PXS::clearTheScreen() {
 }
 
 void SDL2PXS::drawPixel(xy<int> pixel) {
-    xy<int> stratPosInPX = getStartOfPixelPos(pixel);
-    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(stratPosInPX.x, stratPosInPX.y, PXSize, PXSize);
+    xy<int> stratPosInRealPixels = getStartOfPixelPos(pixel);
+    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(stratPosInRealPixels.x, stratPosInRealPixels.y, PXSize, PXSize);
     SDL_RenderFillRect(renderer, rect.get());
 
     setPixelColor(pixel);
@@ -42,10 +42,10 @@ void SDL2PXS::drawRect(xy<int> startPixel, int W, int H) {
 void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
     correctNegativeWH(startPixel, W, H);
 
-    xy<int> stratPosInPX = getStartOfPixelPos(startPixel);
-    int widthInPX = (W * PXSize) + ((W - 1) * gridSize),
-        heightInPX = (H * PXSize) + ((H - 1) * gridSize);
-    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(stratPosInPX.x, stratPosInPX.y, widthInPX, heightInPX);
+    xy<int> stratPosInRealPixels = getStartOfPixelPos(startPixel);
+    int widthInRealPixels = (W * PXSize) + ((W - 1) * gridSize),
+        heightInRealPixels = (H * PXSize) + ((H - 1) * gridSize);
+    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(stratPosInRealPixels.x, stratPosInRealPixels.y, widthInRealPixels, heightInRealPixels);
     SDL_RenderFillRect(renderer, rect.get());
 
     for (int i = 0; i < H; i++) {
@@ -55,7 +55,7 @@ void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
     }
 
     if (gridSize > 0) {
-        *rect = SDL_Rect{ stratPosInPX.x - gridSize, stratPosInPX.y - gridSize, widthInPX + gridSize, heightInPX + gridSize };
+        *rect = SDL_Rect{ stratPosInRealPixels.x - gridSize, stratPosInRealPixels.y - gridSize, widthInRealPixels + gridSize, heightInRealPixels + gridSize };
         SDL_RenderCopy(renderer, gridTexture, rect.get(), rect.get());
     }
 }

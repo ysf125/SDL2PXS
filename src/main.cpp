@@ -15,9 +15,7 @@ int main(int argc, char* args[]) {
 	Uint32 flags = SDL_WINDOW_SHOWN;
 	SDL_Window* window = SDL_CreateWindow("SDL2PXS snake game test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, flags);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-	SDL2PXS screen = SDL2PXS(window, renderer, 60, 45, 15, noOverflow);
-
-	screen.showChanges();
+	SDL2PXS screen = SDL2PXS(window, renderer, 800, 600, 60, 45, 15, (options)(autoWidthAndHeight | resizeTheScreen));
 
 	// Variables for the game
 	int pixelsInX, pixelsInY;
@@ -38,29 +36,15 @@ int main(int argc, char* args[]) {
 		case SDL_KEYDOWN:
 			switch (e.key.keysym.sym) {
 			case SDLK_RIGHT: movingDirection = movingDirection == 4 ? 4 : 0; break;
-			case SDLK_DOWN: movingDirection = movingDirection == 6 ? 6 : 2; break;
-			case SDLK_LEFT: movingDirection = movingDirection == 0 ? 0 : 4; break;
-			case SDLK_UP: movingDirection = movingDirection == 2 ? 2 : 6; break;
+			case SDLK_DOWN:  movingDirection = movingDirection == 6 ? 6 : 2; break;
+			case SDLK_LEFT:  movingDirection = movingDirection == 0 ? 0 : 4; break;
+			case SDLK_UP:    movingDirection = movingDirection == 2 ? 2 : 6; break;
 			} break;
 		}
 
 		// Makes the game playable
 		SDL_Delay(16);
 		if (loop == 4) loop = 0; else { loop++; continue; }
-
-		// Drawing everything to the screen
-		screen.setDrawColor({ 255, 0, 0 });
-		screen.drawPixel(food);
-
-		screen.setDrawColor({ 0, 255, 0 });
-		snake.push_back(movePointInGrid(snake[snake.size() - 1], movingDirection));
-		screen.drawPixel(snake[snake.size() - 1]);
-
-		screen.setDrawColor({ 0, 0, 0 });
-		screen.drawPixel(snake[0]);
-		snake.erase(snake.begin());
-
-		screen.showChanges();
 
 		// Logic for the game
 		if (isPixelOnTop(snake[snake.size() - 1], food)) {
@@ -76,6 +60,20 @@ int main(int argc, char* args[]) {
 		for (Uint64 i = 0; i < snake.size() - 1; i++) {
 			if (isPixelOnTop(snake[i], snake[snake.size() - 1])) quit = true;
 		}
+
+		// Drawing everything to the screen
+		screen.setDrawColor({ 255, 0, 0 });
+		screen.drawPixel(food);
+
+		screen.setDrawColor({ 0, 255, 0 });
+		snake.push_back(movePointInGrid(snake[snake.size() - 1], movingDirection));
+		screen.drawPixel(snake[snake.size() - 1]);
+
+		screen.setDrawColor({ 0, 0, 0 });
+		screen.drawPixel(snake[0]);
+		snake.erase(snake.begin());
+
+		screen.showChanges();
 	}
 
 	screen.closeSDL2PXS();
