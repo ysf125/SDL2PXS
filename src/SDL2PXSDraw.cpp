@@ -30,27 +30,27 @@ void SDL2PXS::drawPixel(xy<int> pixel) {
     setPixelColor(pixel);
 }
 
-void SDL2PXS::drawRect(xy<int> startPixel, int W, int H) {
-    correctNegativeWH(startPixel, W, H);
+void SDL2PXS::drawRect(SDL_Rect dst) {
+    correctNegativeWH(dst);
 
-    drawFillRect(startPixel, W, 1);
-    drawFillRect(startPixel, 1, H);
-    drawFillRect({ startPixel.x, startPixel.y + (H - 1) }, W, 1);
-    drawFillRect({ startPixel.x + (W - 1), startPixel.y }, 1, H);
+    drawFillRect({ dst.x, dst.y, dst.w, 1 });
+    drawFillRect({ dst.x, dst.y, 1, dst.h });
+    drawFillRect({ dst.x, dst.y + (dst.h - 1) , dst.w, 1 });
+    drawFillRect({ dst.x + (dst.w - 1), dst.y , 1, dst.h});
 }
 
-void SDL2PXS::drawFillRect(xy<int> startPixel, int W, int H) {
-    correctNegativeWH(startPixel, W, H);
+void SDL2PXS::drawFillRect(SDL_Rect dst) {
+    correctNegativeWH(dst);
 
-    xy<int> stratPosInRealPixels = getStartOfPixelPos(startPixel);
-    int widthInRealPixels = (W * PXSize) + ((W - 1) * gridSize),
-        heightInRealPixels = (H * PXSize) + ((H - 1) * gridSize);
+    xy<int> stratPosInRealPixels = getStartOfPixelPos({dst.x, dst.y});
+    int widthInRealPixels = (dst.w * PXSize) + ((dst.w - 1) * gridSize),
+        heightInRealPixels = (dst.h * PXSize) + ((dst.h - 1) * gridSize);
     S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(stratPosInRealPixels.x, stratPosInRealPixels.y, widthInRealPixels, heightInRealPixels);
     SDL_RenderFillRect(renderer, rect.get());
 
-    for (int i = 0; i < H; i++) {
-        for (int j = 0; j < W; j++) {
-            setPixelColor({ startPixel.x + j, startPixel.y + i });
+    for (int i = 0; i < dst.h; i++) {
+        for (int j = 0; j < dst.w; j++) {
+            setPixelColor({ dst.x + j, dst.y + i });
         }
     }
 

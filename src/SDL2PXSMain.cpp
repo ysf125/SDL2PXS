@@ -36,9 +36,9 @@ void SDL2PXS::setPixelColor(xy<int> pixel) {
     PXSplane.pixels[(pixel.y * PXSplane.pixelsInY) + pixel.x] = drawColor;
 }
 
-void SDL2PXS::correctNegativeWH(xy<int>& startPixel, int& W, int& H) {
-    if (W < 0) { startPixel.x += (W + 1); W = abs(W); }
-    if (H < 0) { startPixel.y += (H + 1); H = abs(H); }
+void SDL2PXS::correctNegativeWH(SDL_Rect& dst) {
+    if (dst.w < 0) { dst.x += (dst.w + 1); dst.w = abs(dst.w); }
+    if (dst.h < 0) { dst.y += (dst.h + 1); dst.h = abs(dst.h); }
 }
 
 // Public area
@@ -93,27 +93,27 @@ RGB SDL2PXS::getPixleColor(xy<int> pixel) {
     return PXSplane.pixels[(pixel.y * PXSplane.pixelsInY) + pixel.x];
 }
 
-plane2D SDL2PXS::copyFromScreen(xy<int> startPixel, int W, int H) {
-    correctNegativeWH(startPixel, W, H);
+plane2D SDL2PXS::copyFromScreen(SDL_Rect src) {
+    correctNegativeWH(src);
     
-    plane2D returnedPlane = { W, H };
-    for (int i = 0; i < H; i++) {
-        for (int j = 0; j < W; j++) {
-            RGB pixelColor = getPixleColor({startPixel.x + j , startPixel.y + i});              
-            returnedPlane.pixels[(startPixel.x + j) + (startPixel.y + i) * W] = pixelColor;
+    plane2D returnedPlane = { src.w, src.h };
+    for (int i = 0; i < src.h; i++) {
+        for (int j = 0; j < src.w; j++) {
+            RGB pixelColor = getPixleColor({src.x + j , src.y + i});              
+            returnedPlane.pixels[(src.x + j) + (src.y + i) * src.w] = pixelColor;
         }
     }
     return returnedPlane;
 }
 
-plane2D SDL2PXS::copyFromPlane(plane2D& plane, xy<int> startPixel, int W, int H) {
-    correctNegativeWH(startPixel, W, H);
+plane2D SDL2PXS::copyFromPlane(plane2D& plane, SDL_Rect src) {
+    correctNegativeWH(src);
 
-    plane2D returnedPlane = { W, H };
-    for (int i = 0; i < H; i++) {
-        for (int j = 0; j < W; j++) {
-            RGB pixelColor = plane.pixels[(startPixel.x + j) + (startPixel.y + i) * plane.pixelsInX];              
-            returnedPlane.pixels[(startPixel.x + j) + (startPixel.y + i) * W] = pixelColor;
+    plane2D returnedPlane = { src.w, src.h };
+    for (int i = 0; i < src.h; i++) {
+        for (int j = 0; j < src.w; j++) {
+            RGB pixelColor = plane.pixels[(src.x + j) + (src.y + i) * plane.pixelsInX];              
+            returnedPlane.pixels[(src.x + j) + (src.y + i) * src.w] = pixelColor;
         }
     }
     return returnedPlane;

@@ -36,7 +36,7 @@ class SDL2PXS {
 
     void setPixelColor(xy<int> pixel);
 
-    void correctNegativeWH(xy<int>& startPixel, int& W, int& H);
+    void correctNegativeWH(SDL_Rect& dst);
 
     void drawGrid();
 
@@ -76,25 +76,25 @@ public:
     RGB getPixleColor(xy<int> pixel);
 
     // Copies a rectangle of pixels from the screen to plane2D struct
-    plane2D copyFromScreen(xy<int> startPixel, int W, int H);
+    plane2D copyFromScreen(SDL_Rect src);
 
     // Copies a rectangle of pixels from plane2D struct to the screen
-    plane2D copyFromPlane(plane2D& plane, xy<int> startPixel, int W, int H);
+    plane2D copyFromPlane(plane2D& plane, SDL_Rect src);
 
     // Pastes a rectangle of pixels from plane2D struct to the screen
-    void pasteToScreen(plane2D& plane, SDL_Rect& src, xy<int> dstStartPixel);
+    void pasteToScreen(plane2D& plane, SDL_Rect src, xy<int> dstStartPixel);
 
     // Pastes a rectangle of pixels from plane2D struct to another plane2D struct 
-    void pasteToPlane(plane2D& srcPlane, plane2D& dstPlane, SDL_Rect& src, xy<int> dstStartPixel);
+    void pasteToPlane(plane2D& srcPlane, plane2D& dstPlane, SDL_Rect src, xy<int> dstStartPixel);
 
     // Draws a pixel to the screen
     void drawPixel(xy<int> pixel);
 
     // Draws a rectangle to the screen
-    void drawRect(xy<int> startPixel, int W, int H);
+    void drawRect(SDL_Rect dst);
 
     // Draws a filled rectangle to the screen
-    void drawFillRect(xy<int> startPixel, int W, int H);
+    void drawFillRect(SDL_Rect dst);
 
     // Draws a line using my line algorithm (call it angline for now) to the screen
     void drawLine(xy<int> Pixel0, xy<int> pixel1);
