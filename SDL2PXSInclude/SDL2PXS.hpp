@@ -16,7 +16,7 @@ struct RGB { Uint8 R, G, B; };
 
 struct plane2D {
     int pixelsInX, pixelsInY;
-    S vector<RGB> pixels;
+    S vector<S vector<RGB>> pixels;
 };
 
 class SDL2PXS {
@@ -36,7 +36,7 @@ class SDL2PXS {
 
     void setPixelColor(xy<int> pixel);
 
-    void correctNegativeWH(SDL_Rect& dst);
+    void correctNegativeWidthAndHeight(SDL_Rect& dst);
 
     void drawGrid();
 
@@ -44,6 +44,12 @@ public:
     SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int W, int H, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions = none, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
 
     SDL2PXS(S string windowTitle, int W, int H, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions = none, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
+
+    // Returns the window
+    SDL_Window* getWindow();
+    
+    // Returns the renderer
+    SDL_Renderer* getRenderer();
 
     // Returns width and height in real pixels  
     void getWidthAndHeight(int& W, int& H);
@@ -69,11 +75,17 @@ public:
     // Returns true if the given pixel isn't inside the screen
     bool notInsideTheScreen(xy<int> pixel);
 
+    // Returns true if the given pixel isn't inside the plane given
+    bool notInsideThePlane(plane2D& plane, xy<int> pixel);
+
     // Sets the color for anything that can draw to the screen
     void setDrawColor(RGB color = { 0, 0, 0 });
 
     // Returns RGB color for a pixel on the screen
     RGB getPixleColor(xy<int> pixel);
+
+    // Returns RGB color for a pixel on the plane given
+    RGB getPixleColorFromPlane(plane2D& plane, xy<int> pixel);
 
     // Copies a rectangle of pixels from the screen to plane2D struct
     plane2D copyFromScreen(SDL_Rect src);

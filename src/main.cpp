@@ -15,15 +15,15 @@ int main(int argc, char* args[]) {
 	Uint32 flags = SDL_WINDOW_SHOWN;
 	SDL_Window* window = SDL_CreateWindow("SDL2PXS snake game test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, flags);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-	SDL2PXS screen = SDL2PXS(window, renderer, 800, 600, 60, 45, 15, (options)(autoWidthAndHeight | resizeTheScreen));
+	SDL2PXS screen = SDL2PXS(window, renderer, 0, 0, 60, 45, 15, (options)(autoWidthAndHeight | resizeTheScreen));
 
 	// Variables for the game
 	int pixelsInX, pixelsInY;
 	screen.getPixelsInXAndY(pixelsInX, pixelsInY);
 	int loop = 0;
 	int movingDirection = 0;
-	xy<int> food = { randomInt(0 , pixelsInX - 2), randomInt(0 , pixelsInY - 2) };
-	S vector<xy<int>> snake = { { (int)floor(pixelsInX / 2), (int)floor(pixelsInY / 2) } };
+	xy<int> food = { randomInt(0 , pixelsInX - 1), randomInt(0 , pixelsInY - 1) };
+	S vector<xy<int>> snake = { { (int)(pixelsInX / 2), (int)(pixelsInY / 2) } };
 
 	// Game loop 
 	SDL_Event e;
@@ -39,6 +39,11 @@ int main(int argc, char* args[]) {
 			case SDLK_DOWN:  movingDirection = movingDirection == 6 ? 6 : 2; break;
 			case SDLK_LEFT:  movingDirection = movingDirection == 0 ? 0 : 4; break;
 			case SDLK_UP:    movingDirection = movingDirection == 2 ? 2 : 6; break;
+			case SDLK_SPACE:
+				// screen.drawFillRect({ 0, 0, 5, 5 });
+				// plane2D plane = screen.copyFromScreen({ 0, 0, 5, 5 });
+				// screen.pasteToScreen(plane, { 0, 0, 5, 5 }, { 6, 6 });
+				; break;
 			} break;
 		}
 
@@ -55,13 +60,13 @@ int main(int argc, char* args[]) {
 			}
 		}
 
+		for (Uint64 i = 0; i < snake.size() - 1; i++) 
+			if (isPixelOnTop(snake[i], snake[snake.size() - 1])) quit = true;
+		
+
 		if (screen.notInsideTheScreen(snake[snake.size() - 1])) quit = true;
 
-		for (Uint64 i = 0; i < snake.size() - 1; i++) {
-			if (isPixelOnTop(snake[i], snake[snake.size() - 1])) quit = true;
-		}
-
-		// Drawing everything to the screen
+		// Draws everything to the screen
 		screen.setDrawColor({ 255, 0, 0 });
 		screen.drawPixel(food);
 

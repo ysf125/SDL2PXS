@@ -18,7 +18,7 @@ void SDL2PXS::drawGrid() {
 // Public area
 void SDL2PXS::clearTheScreen() {
     SDL_RenderClear(renderer);
-    S fill(PXSplane.pixels.begin(), PXSplane.pixels.end(), drawColor);
+    for (int i = 0; i < PXSplane.pixelsInY; i++) S fill(PXSplane.pixels[i].begin(), PXSplane.pixels[i].end(), drawColor);
     if (gridSize > 0) SDL_RenderCopy(renderer, gridTexture, NULL, NULL);
 }
 
@@ -31,18 +31,18 @@ void SDL2PXS::drawPixel(xy<int> pixel) {
 }
 
 void SDL2PXS::drawRect(SDL_Rect dst) {
-    correctNegativeWH(dst);
+    correctNegativeWidthAndHeight(dst);
 
     drawFillRect({ dst.x, dst.y, dst.w, 1 });
     drawFillRect({ dst.x, dst.y, 1, dst.h });
     drawFillRect({ dst.x, dst.y + (dst.h - 1) , dst.w, 1 });
-    drawFillRect({ dst.x + (dst.w - 1), dst.y , 1, dst.h});
+    drawFillRect({ dst.x + (dst.w - 1), dst.y , 1, dst.h });
 }
 
 void SDL2PXS::drawFillRect(SDL_Rect dst) {
-    correctNegativeWH(dst);
+    correctNegativeWidthAndHeight(dst);
 
-    xy<int> stratPosInRealPixels = getStartOfPixelPos({dst.x, dst.y});
+    xy<int> stratPosInRealPixels = getStartOfPixelPos({ dst.x, dst.y });
     int widthInRealPixels = (dst.w * PXSize) + ((dst.w - 1) * gridSize),
         heightInRealPixels = (dst.h * PXSize) + ((dst.h - 1) * gridSize);
     S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(stratPosInRealPixels.x, stratPosInRealPixels.y, widthInRealPixels, heightInRealPixels);

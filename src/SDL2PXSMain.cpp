@@ -6,11 +6,14 @@ void SDL2PXS::setup() {
         width = (PXSplane.pixelsInX * PXSize) + ((PXSplane.pixelsInX - 1) * gridSize);
         height = (PXSplane.pixelsInY * PXSize) + ((PXSplane.pixelsInY - 1) * gridSize);
     }
+    
     if ((PXSOptions & autoPixelsInXAndY) == autoPixelsInXAndY) {
         PXSplane.pixelsInX = ceil(width / (PXSize + gridSize));
         PXSplane.pixelsInY = ceil(height / (PXSize + gridSize));
     }
+    
     if ((PXSOptions & resizeTheScreen) == resizeTheScreen) SDL_SetWindowSize(window, width, height);
+    
     if (gridSize > 0) {
         surface = SDL_CreateRGBSurface(0, width, height, 32, 0xff, 0xff00, 0xff0000, 0xff000000);
         Uint32 color = SDL_MapRGBA(surface->format, 0, 0, 0, 0);
@@ -20,7 +23,8 @@ void SDL2PXS::setup() {
         SDL_FreeSurface(surface);
     }
 
-    PXSplane.pixels.resize(PXSplane.pixelsInX * PXSplane.pixelsInY);
+    PXSplane.pixels.resize(PXSplane.pixelsInY);
+    for (int i = 0; i < PXSplane.pixelsInY; i++) PXSplane.pixels[i].resize(PXSplane.pixelsInX);
     setDrawColor();
     clearTheScreen();
 }
@@ -33,10 +37,10 @@ xy<int> SDL2PXS::getStartOfPixelPos(xy<int> pixel) {
 
 void SDL2PXS::setPixelColor(xy<int> pixel) {
     if (notInsideTheScreen(pixel)) return;
-    PXSplane.pixels[(pixel.y * PXSplane.pixelsInY) + pixel.x] = drawColor;
+    PXSplane.pixels[pixel.y][pixel.x] = drawColor;
 }
 
-void SDL2PXS::correctNegativeWH(SDL_Rect& dst) {
+void SDL2PXS::correctNegativeWidthAndHeight(SDL_Rect& dst) {
     if (dst.w < 0) { dst.x += (dst.w + 1); dst.w = abs(dst.w); }
     if (dst.h < 0) { dst.y += (dst.h + 1); dst.h = abs(dst.h); }
 }
@@ -55,6 +59,10 @@ SDL2PXS::SDL2PXS(S string windowTitle, int W, int H, int pixelsInX, int pixelsIn
     renderer = SDL_CreateRenderer(window, -1, 0);
     setup();
 }
+
+SDL_Window* SDL2PXS::getWindow() { return window; }
+
+SDL_Renderer* SDL2PXS::getRenderer() { return renderer; }
 
 void SDL2PXS::getWidthAndHeight(int& W, int& H) {
     W = width;
@@ -79,8 +87,10 @@ void SDL2PXS::closeSDL2PXS() {
 
 void SDL2PXS::showChanges() { SDL_RenderPresent(renderer); }
 
-bool SDL2PXS::notInsideTheScreen(xy<int> pixel) {
-    return (pixel.x < 0 || pixel.y < 0 || pixel.x > PXSplane.pixelsInX || pixel.y > PXSplane.pixelsInY);
+bool SDL2PXS::notInsideTheScreen(xy<int> pixel) { return notInsideThePlane(PXSplane, pixel); }
+
+bool SDL2PXS::notInsideThePlane(plane2D& plane, xy<int> pixel) {
+    return (pixel.x < 0 || pixel.y < 0 || pixel.x > plane.pixelsInX || pixel.y > plane.pixelsInY);
 }
 
 void SDL2PXS::setDrawColor(RGB color) {
@@ -88,33 +98,9 @@ void SDL2PXS::setDrawColor(RGB color) {
     SDL_SetRenderDrawColor(renderer, color.R, color.G, color.B, 255);
 }
 
-RGB SDL2PXS::getPixleColor(xy<int> pixel) {
-    if (notInsideTheScreen(pixel)) return { 0, 0, 0 };
-    return PXSplane.pixels[(pixel.y * PXSplane.pixelsInY) + pixel.x];
-}
+RGB SDL2PXS::getPixleColor(xy<int> pixel) { return getPixleColorFromPlane(PXSplane, pixel); }
 
-plane2D SDL2PXS::copyFromScreen(SDL_Rect src) {
-    correctNegativeWH(src);
-    
-    plane2D returnedPlane = { src.w, src.h };
-    for (int i = 0; i < src.h; i++) {
-        for (int j = 0; j < src.w; j++) {
-            RGB pixelColor = getPixleColor({src.x + j , src.y + i});              
-            returnedPlane.pixels[(src.x + j) + (src.y + i) * src.w] = pixelColor;
-        }
-    }
-    return returnedPlane;
-}
-
-plane2D SDL2PXS::copyFromPlane(plane2D& plane, SDL_Rect src) {
-    correctNegativeWH(src);
-
-    plane2D returnedPlane = { src.w, src.h };
-    for (int i = 0; i < src.h; i++) {
-        for (int j = 0; j < src.w; j++) {
-            RGB pixelColor = plane.pixels[(src.x + j) + (src.y + i) * plane.pixelsInX];              
-            returnedPlane.pixels[(src.x + j) + (src.y + i) * src.w] = pixelColor;
-        }
-    }
-    return returnedPlane;
+RGB SDL2PXS::getPixleColorFromPlane(plane2D& plane, xy<int> pixel) {
+    if (notInsideThePlane(plane, pixel)) return { 0, 0, 0 };
+    return plane.pixels[pixel.y][pixel.x];
 }

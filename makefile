@@ -4,7 +4,6 @@ flags = -std=c++20 -O3 -Wall -Werror
 testAll :
 	make buildDll
 	make buildExe
-	.\main.exe
 	cls
 
 buildDll :
@@ -16,3 +15,4 @@ buildDll :
 
 buildExe :
 	g++ .\src\main.cpp -o main -lSDL2PXS $(exeFlags) $(flags) $(include)
+	.\main.exe
