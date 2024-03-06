@@ -40,9 +40,9 @@ void SDL2PXS::setPixelColor(xy<int> pixel) {
     PXSplane.pixels[pixel.y][pixel.x] = drawColor;
 }
 
-void SDL2PXS::correctNegativeWidthAndHeight(SDL_Rect& dst) {
-    if (dst.w < 0) { dst.x += (dst.w + 1); dst.w = abs(dst.w); }
-    if (dst.h < 0) { dst.y += (dst.h + 1); dst.h = abs(dst.h); }
+void SDL2PXS::correctNegativeWidthAndHeight(SDL_Rect& rect) {
+    if (rect.w < 0) { rect.x += (rect.w + 1); rect.w = abs(rect.w); }
+    if (rect.h < 0) { rect.y += (rect.h + 1); rect.h = abs(rect.h); }
 }
 
 // Public area
@@ -64,15 +64,9 @@ SDL_Window* SDL2PXS::getWindow() { return window; }
 
 SDL_Renderer* SDL2PXS::getRenderer() { return renderer; }
 
-void SDL2PXS::getWidthAndHeight(int& W, int& H) {
-    W = width;
-    H = height;
-}
+S tuple<int, int> SDL2PXS::getWidthAndHeight() { return { width, height }; }
 
-void SDL2PXS::getPixelsInXAndY(int& pixelsInX, int& pixelsInY) {
-    pixelsInX = PXSplane.pixelsInX;
-    pixelsInY = PXSplane.pixelsInY;
-}
+S tuple<int, int> SDL2PXS::getPixelsInXAndY() { return { PXSplane.pixelsInX, PXSplane.pixelsInY };}
 
 RGB SDL2PXS::getDrawColor() { return drawColor; }
 
@@ -103,4 +97,22 @@ RGB SDL2PXS::getPixleColor(xy<int> pixel) { return getPixleColorFromPlane(PXSpla
 RGB SDL2PXS::getPixleColorFromPlane(plane2D& plane, xy<int> pixel) {
     if (notInsideThePlane(plane, pixel)) return { 0, 0, 0 };
     return plane.pixels[pixel.y][pixel.x];
+}
+
+plane2D SDL2PXS::copyFromScreen(SDL_Rect src) { return copyFromPlane(PXSplane, src); }
+
+plane2D SDL2PXS::copyFromPlane(plane2D& plane, SDL_Rect src) {
+    correctNegativeWidthAndHeight(src);
+
+    RGB color;
+    plane2D returnedPlane = { src.w, src.h };
+    returnedPlane.pixels.resize(src.h);
+    for (int i = 0; i < src.h; i++) {
+        returnedPlane.pixels[i].resize(src.w);
+        for (int j = 0; j < src.w; j++) {
+            color = getPixleColorFromPlane(plane, { src.x + j, src.y + i });
+            returnedPlane.pixels[i][j] = color;
+        }
+    }
+    return returnedPlane;
 }

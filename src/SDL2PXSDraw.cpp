@@ -22,6 +22,17 @@ void SDL2PXS::clearTheScreen() {
     if (gridSize > 0) SDL_RenderCopy(renderer, gridTexture, NULL, NULL);
 }
 
+void SDL2PXS::pasteToScreen(plane2D& plane, SDL_Rect src, xy<int> dstStartPixel) {
+    correctNegativeWidthAndHeight(src);
+    
+    for (int i = 0; i < src.h; i++) {
+        for (int j = 0; j < src.w; j++) {
+            setDrawColor(getPixleColorFromPlane(plane, { src.x + j, src.y + i }));
+            drawPixel({ dstStartPixel.x + j, dstStartPixel.y + i });
+        }
+    }
+}
+
 void SDL2PXS::drawPixel(xy<int> pixel) {
     xy<int> stratPosInRealPixels = getStartOfPixelPos(pixel);
     S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(stratPosInRealPixels.x, stratPosInRealPixels.y, PXSize, PXSize);

@@ -4,6 +4,7 @@
 #include <lineAlgorithm.hpp>
 #include <iostream>
 #include <vector>
+#include <tuple>
 #include <string>
 #include <cmath>
 #include <memory>
@@ -36,7 +37,7 @@ class SDL2PXS {
 
     void setPixelColor(xy<int> pixel);
 
-    void correctNegativeWidthAndHeight(SDL_Rect& dst);
+    void correctNegativeWidthAndHeight(SDL_Rect& rect);
 
     void drawGrid();
 
@@ -52,10 +53,10 @@ public:
     SDL_Renderer* getRenderer();
 
     // Returns width and height in real pixels  
-    void getWidthAndHeight(int& W, int& H);
+    S tuple<int, int> getWidthAndHeight();
 
     // Returns the number of pixels in the x-axis and y-axis
-    void getPixelsInXAndY(int& pixelsInX, int& pixelsInY);
+    S tuple<int, int> getPixelsInXAndY();
 
     // Returns draw color
     RGB getDrawColor();
@@ -68,9 +69,6 @@ public:
 
     // Shows whatever is drawn to the screen 
     void showChanges();
-
-    // Clears the entire screen and draws the grid if grid size > 0 
-    void clearTheScreen();
 
     // Returns true if the given pixel isn't inside the screen
     bool notInsideTheScreen(xy<int> pixel);
@@ -92,6 +90,9 @@ public:
 
     // Copies a rectangle of pixels from plane2D struct to the screen
     plane2D copyFromPlane(plane2D& plane, SDL_Rect src);
+
+    // Clears the entire screen and draws the grid if grid size > 0 
+    void clearTheScreen();
 
     // Pastes a rectangle of pixels from plane2D struct to the screen
     void pasteToScreen(plane2D& plane, SDL_Rect src, xy<int> dstStartPixel);
