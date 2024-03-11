@@ -21,6 +21,7 @@ struct plane2D {
 };
 
 class SDL2PXS {
+    xy<int> startPixel = { 0, 0 };
     int width, height;
     int PXSize, gridSize;
     RGB drawColor, gridColor;
@@ -93,6 +94,9 @@ public:
 
     // Clears the entire screen and draws the grid if grid size > 0 
     void clearTheScreen();
+
+    // Redraw everything including the pixels and the gird
+    void redrawEverything();
 
     // Pastes a rectangle of pixels from plane2D struct to the screen
     void pasteToScreen(plane2D& plane, SDL_Rect src, xy<int> dstStartPixel);

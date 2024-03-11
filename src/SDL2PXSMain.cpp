@@ -6,22 +6,15 @@ void SDL2PXS::setup() {
         width = (PXSplane.pixelsInX * PXSize) + ((PXSplane.pixelsInX - 1) * gridSize);
         height = (PXSplane.pixelsInY * PXSize) + ((PXSplane.pixelsInY - 1) * gridSize);
     }
-    
+
     if ((PXSOptions & autoPixelsInXAndY) == autoPixelsInXAndY) {
         PXSplane.pixelsInX = ceil(width / (PXSize + gridSize));
         PXSplane.pixelsInY = ceil(height / (PXSize + gridSize));
     }
-    
+
     if ((PXSOptions & resizeTheScreen) == resizeTheScreen) SDL_SetWindowSize(window, width, height);
-    
-    if (gridSize > 0) {
-        surface = SDL_CreateRGBSurface(0, width, height, 32, 0xff, 0xff00, 0xff0000, 0xff000000);
-        Uint32 color = SDL_MapRGBA(surface->format, 0, 0, 0, 0);
-        SDL_FillRect(surface, NULL, color);
-        drawGrid();
-        gridTexture = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_FreeSurface(surface);
-    }
+
+    if (gridSize > 0) drawGrid(); 
 
     PXSplane.pixels.resize(PXSplane.pixelsInY);
     for (int i = 0; i < PXSplane.pixelsInY; i++) PXSplane.pixels[i].resize(PXSplane.pixelsInX);
@@ -30,9 +23,9 @@ void SDL2PXS::setup() {
 }
 
 xy<int> SDL2PXS::getStartOfPixelPos(xy<int> pixel) {
-    int x = (pixel.x * PXSize) + (pixel.x * gridSize),
+    int x = (pixel.x * PXSize) + (pixel.x * gridSize) ,
         y = (pixel.y * PXSize) + (pixel.y * gridSize);
-    return { x, y };
+    return { x + startPixel.x, y + startPixel.y };
 }
 
 void SDL2PXS::setPixelColor(xy<int> pixel) {
@@ -66,7 +59,7 @@ SDL_Renderer* SDL2PXS::getRenderer() { return renderer; }
 
 S tuple<int, int> SDL2PXS::getWidthAndHeight() { return { width, height }; }
 
-S tuple<int, int> SDL2PXS::getPixelsInXAndY() { return { PXSplane.pixelsInX, PXSplane.pixelsInY };}
+S tuple<int, int> SDL2PXS::getPixelsInXAndY() { return { PXSplane.pixelsInX, PXSplane.pixelsInY }; }
 
 RGB SDL2PXS::getDrawColor() { return drawColor; }
 
