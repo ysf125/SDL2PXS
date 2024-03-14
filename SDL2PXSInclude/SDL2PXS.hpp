@@ -62,8 +62,8 @@ public:
 
 // Utilities section
 
-    // Restart everything without deleting the pixels or the gird
-    void restartEverything();
+    // Restart the screen without deleting the pixels or the gird
+    void restart();
 
     // Returns true if the given pixel isn't inside the screen
     bool notInsideTheScreen(xy<int> pixel);
@@ -90,18 +90,24 @@ public:
 
     // Returns the options for the screen 
     options getPXSOptions();
+    
+    // Returns RGB color for a pixel on the screen
+    RGB getPixleColor(xy<int> pixel);
+
+    // Returns RGB color for a pixel on the plane given
+    RGB getPixleColorFromPlane(plane2D& plane, xy<int> pixel);
+
+    // Sets the options for screen
+    void setPXSOptions(options PXSOptions);
+
+    // Sets the grid size and grid color draw it to the screen
+    void setGrid(int gridSize, RGB gridColor);
 
     // Sets the start pixel (0, 0) for the given pixel in real pixels 
     void setStartPixel(xy<int> startPixel = { 0, 0 });
 
     // Sets the color for anything that can draw to the screen
     void setDrawColor(RGB color = { 0, 0, 0 });
-
-    // Returns RGB color for a pixel on the screen
-    RGB getPixleColor(xy<int> pixel);
-
-    // Returns RGB color for a pixel on the plane given
-    RGB getPixleColorFromPlane(plane2D& plane, xy<int> pixel);
 
 // Copy and paste section
 

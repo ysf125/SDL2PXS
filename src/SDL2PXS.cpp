@@ -1,10 +1,10 @@
 #include "SDL2PXS.hpp"
 
-// Public area
+// Public
 
 // Utilities section
 
-void SDL2PXS::restartEverything() {
+void SDL2PXS::restart() {
     plane2D plane = PXSplane;
     setup();
     for (int i = 0; i < PXSplane.pixelsInY; i++) {
@@ -35,21 +35,32 @@ RGB SDL2PXS::getDrawColor() { return drawColor; }
 
 options SDL2PXS::getPXSOptions() { return PXSOptions; }
 
-void SDL2PXS::setStartPixel(xy<int> startPixel) {
-    this->startPixel = startPixel;
-    restartEverything(); 
-}
-
-void SDL2PXS::setDrawColor(RGB color) {
-    drawColor = color;
-    SDL_SetRenderDrawColor(renderer, color.R, color.G, color.B, 255);
-}
-
 RGB SDL2PXS::getPixleColor(xy<int> pixel) { return getPixleColorFromPlane(PXSplane, pixel); }
 
 RGB SDL2PXS::getPixleColorFromPlane(plane2D& plane, xy<int> pixel) {
     if (notInsideThePlane(plane, pixel)) return { 0, 0, 0 };
     return plane.pixels[pixel.y][pixel.x];
+}
+
+void SDL2PXS::setPXSOptions(options PXSOptions) {
+    this->PXSOptions = PXSOptions;
+    restart();
+}
+
+void SDL2PXS::setGrid(int gridSize, RGB gridColor) {
+    this->gridSize = gridSize;
+    this->gridColor = gridColor;
+    restart();
+}
+
+void SDL2PXS::setStartPixel(xy<int> startPixel) {
+    this->startPixel = startPixel;
+    restart(); 
+}
+
+void SDL2PXS::setDrawColor(RGB color) {
+    drawColor = color;
+    SDL_SetRenderDrawColor(renderer, color.R, color.G, color.B, 255);
 }
 
 // Copy and paste section

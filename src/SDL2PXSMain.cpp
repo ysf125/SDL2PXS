@@ -1,6 +1,6 @@
 #include "SDL2PXS.hpp"
 
-// Private area
+// Private 
 void SDL2PXS::setup() {
     if ((PXSOptions & autoWidthAndHeight) == autoWidthAndHeight) {
         width = (PXSplane.pixelsInX * PXSize) + ((PXSplane.pixelsInX - 1) * gridSize);
@@ -13,7 +13,7 @@ void SDL2PXS::setup() {
     }
 
     if ((PXSOptions & resizeTheScreen) == resizeTheScreen) SDL_SetWindowSize(window, width, height);
-
+    
     if (gridSize > 0) drawGrid();
 
     PXSplane.pixels.resize(PXSplane.pixelsInY);
@@ -58,7 +58,7 @@ void SDL2PXS::drawGrid() {
     SDL_FreeSurface(surface);
 }
 
-// Public area
+// Public
 
 // Main section
 
@@ -86,7 +86,6 @@ void SDL2PXS::closeSDL2PXS() {
 }
 
 void SDL2PXS::showChanges() { SDL_RenderPresent(renderer); }
-
 
 void SDL2PXS::clearTheScreen() {
     S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(startPixel.x, startPixel.y, width, height);
