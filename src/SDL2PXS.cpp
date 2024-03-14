@@ -1,48 +1,80 @@
 #include "SDL2PXS.hpp"
 
-// Private area
-void SDL2PXS::drawGrid() {
-    SDL_DestroyTexture(gridTexture);
-    surface = SDL_CreateRGBSurface(0, width, height, 32, 0xff, 0xff00, 0xff0000, 0xff000000);
-    SDL_FillRect(surface, NULL, SDL_MapRGBA(surface->format, 0, 0, 0, 0));
-        
-    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>();
-    Uint32 color = SDL_MapRGB(surface->format, gridColor.R, gridColor.G, gridColor.B);
-    for (int i = 0; i < PXSplane.pixelsInX; i++) {
-        *rect = { getStartOfPixelPos({ i, 0 }).x - gridSize, 0, gridSize, height };
-        SDL_FillRect(surface, rect.get(), color);
-    }
-    for (int i = 0; i < PXSplane.pixelsInY; i++) {
-        *rect = SDL_Rect{ 0, getStartOfPixelPos({ 0, i }).y - gridSize, width, gridSize };
-        SDL_FillRect(surface, rect.get(), color);
-    }
-
-    gridTexture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-}
-
 // Public area
-void SDL2PXS::clearTheScreen() {
-    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(startPixel.x, startPixel.y, width, height);
-    SDL_RenderFillRect(renderer, rect.get());
-    for (int i = 0; i < PXSplane.pixelsInY; i++) S fill(PXSplane.pixels[i].begin(), PXSplane.pixels[i].end(), drawColor);
-    if (gridSize > 0) SDL_RenderCopy(renderer, gridTexture, rect.get(), rect.get());
-}
 
-void SDL2PXS::redrawEverything() {
+// Utilities section
+
+void SDL2PXS::restartEverything() {
     plane2D plane = PXSplane;
     setup();
     for (int i = 0; i < PXSplane.pixelsInY; i++) {
-        for (int j = 0; j < PXSplane.pixelsInX; j++) { 
+        for (int j = 0; j < PXSplane.pixelsInX; j++) {
             setDrawColor(getPixleColorFromPlane(plane, { j, i }));
-            drawPixel({ j, i }); 
+            drawPixel({ j, i });
         }
     }
 }
 
+bool SDL2PXS::notInsideTheScreen(xy<int> pixel) { return notInsideThePlane(PXSplane, pixel); }
+
+bool SDL2PXS::notInsideThePlane(plane2D& plane, xy<int> pixel) {
+    return (pixel.x < 0 || pixel.y < 0 || pixel.x > plane.pixelsInX || pixel.y > plane.pixelsInY);
+}
+
+// Setters and getters section
+
+SDL_Window* SDL2PXS::getWindow() { return window; }
+
+SDL_Renderer* SDL2PXS::getRenderer() { return renderer; }
+
+S tuple<int, int> SDL2PXS::getWidthAndHeight() { return { width, height }; }
+
+S tuple<int, int> SDL2PXS::getPixelsInXAndY() { return { PXSplane.pixelsInX, PXSplane.pixelsInY }; }
+
+RGB SDL2PXS::getDrawColor() { return drawColor; }
+
+options SDL2PXS::getPXSOptions() { return PXSOptions; }
+
+void SDL2PXS::setStartPixel(xy<int> startPixel) {
+    this->startPixel = startPixel;
+    restartEverything(); 
+}
+
+void SDL2PXS::setDrawColor(RGB color) {
+    drawColor = color;
+    SDL_SetRenderDrawColor(renderer, color.R, color.G, color.B, 255);
+}
+
+RGB SDL2PXS::getPixleColor(xy<int> pixel) { return getPixleColorFromPlane(PXSplane, pixel); }
+
+RGB SDL2PXS::getPixleColorFromPlane(plane2D& plane, xy<int> pixel) {
+    if (notInsideThePlane(plane, pixel)) return { 0, 0, 0 };
+    return plane.pixels[pixel.y][pixel.x];
+}
+
+// Copy and paste section
+
+plane2D SDL2PXS::copyFromScreen(SDL_Rect src) { return copyFromPlane(PXSplane, src); }
+
+plane2D SDL2PXS::copyFromPlane(plane2D& plane, SDL_Rect src) {
+    correctNegativeWidthAndHeight(src);
+
+    RGB color;
+    plane2D returnedPlane = { src.w, src.h };
+    returnedPlane.pixels.resize(src.h);
+    for (int i = 0; i < src.h; i++) {
+        returnedPlane.pixels[i].resize(src.w);
+        for (int j = 0; j < src.w; j++) {
+            color = getPixleColorFromPlane(plane, { src.x + j, src.y + i });
+            returnedPlane.pixels[i][j] = color;
+        }
+    }
+    return returnedPlane;
+}
+
 void SDL2PXS::pasteToScreen(plane2D& plane, SDL_Rect src, xy<int> dstStartPixel) {
     correctNegativeWidthAndHeight(src);
-    
+
     for (int i = 0; i < src.h; i++) {
         for (int j = 0; j < src.w; j++) {
             setDrawColor(getPixleColorFromPlane(plane, { src.x + j, src.y + i }));
@@ -57,17 +89,18 @@ void SDL2PXS::pasteToPlane(plane2D& srcPlane, plane2D& dstPlane, SDL_Rect src, x
     RGB color;
     for (int i = 0; i < src.h; i++) {
         for (int j = 0; j < src.w; j++) {
-            if (notInsideThePlane(dstPlane, { src.x + j, src.y + i })) continue; 
+            if (notInsideThePlane(dstPlane, { src.x + j, src.y + i })) continue;
             color = getPixleColorFromPlane(srcPlane, { src.x + j, src.y + i });
             dstPlane.pixels[dstStartPixel.y + i][dstStartPixel.x + j] = color;
         }
     }
 }
 
+// Draw section
+
 void SDL2PXS::drawPixel(xy<int> pixel) {
     xy<int> startPosInRealPixels = getStartOfPixelPos(pixel);
-    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(startPosInRealPixels.x, startPosInRealPixels.y, PXSize, PXSize);
-    SDL_RenderFillRect(renderer, rect.get());
+    SDL_RenderFillRect(renderer, S make_unique<SDL_Rect>(startPosInRealPixels.x, startPosInRealPixels.y, PXSize, PXSize).get());
 
     setPixelColor(pixel);
 }

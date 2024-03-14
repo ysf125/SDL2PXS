@@ -21,7 +21,7 @@ struct plane2D {
 };
 
 class SDL2PXS {
-    xy<int> startPixel = { 0, 0 };
+    xy<int> startPixel;
     int width, height;
     int PXSize, gridSize;
     RGB drawColor, gridColor;
@@ -43,13 +43,39 @@ class SDL2PXS {
     void drawGrid();
 
 public:
-    SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int W, int H, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions = none, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
+// Main section
 
-    SDL2PXS(S string windowTitle, int W, int H, int pixelsInX, int pixelsInY, int PXSize, options PXSOptions = none, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
+    SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int W, int H, int pixelsInX, int pixelsInY, int PXSize,
+    options PXSOptions = none, xy<int> startPixel = { 0, 0 }, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
+
+    SDL2PXS(S string windowTitle, int W, int H, int pixelsInX, int pixelsInY, int PXSize,
+    options PXSOptions = none, xy<int> startPixel = { 0, 0 }, int gridSize = 0, RGB gridColor = { 0, 0, 0 });
+
+    // You can call this method when you finish using SDL2PXS 
+    void closeSDL2PXS();
+
+    // Shows whatever is drawn to the screen 
+    void showChanges();
+
+    // Clears the entire screen and draws the grid if grid size > 0 
+    void clearTheScreen();
+
+// Utilities section
+
+    // Restart everything without deleting the pixels or the gird
+    void restartEverything();
+
+    // Returns true if the given pixel isn't inside the screen
+    bool notInsideTheScreen(xy<int> pixel);
+
+    // Returns true if the given pixel isn't inside the plane given
+    bool notInsideThePlane(plane2D& plane, xy<int> pixel);
+
+// Setters and getters section
 
     // Returns the window
     SDL_Window* getWindow();
-    
+
     // Returns the renderer
     SDL_Renderer* getRenderer();
 
@@ -65,17 +91,8 @@ public:
     // Returns the options for the screen 
     options getPXSOptions();
 
-    // You can call this method when you finish using SDL2PXS 
-    void closeSDL2PXS();
-
-    // Shows whatever is drawn to the screen 
-    void showChanges();
-
-    // Returns true if the given pixel isn't inside the screen
-    bool notInsideTheScreen(xy<int> pixel);
-
-    // Returns true if the given pixel isn't inside the plane given
-    bool notInsideThePlane(plane2D& plane, xy<int> pixel);
+    // Sets the start pixel (0, 0) for the given pixel in real pixels 
+    void setStartPixel(xy<int> startPixel = { 0, 0 });
 
     // Sets the color for anything that can draw to the screen
     void setDrawColor(RGB color = { 0, 0, 0 });
@@ -86,23 +103,21 @@ public:
     // Returns RGB color for a pixel on the plane given
     RGB getPixleColorFromPlane(plane2D& plane, xy<int> pixel);
 
+// Copy and paste section
+
     // Copies a rectangle of pixels from the screen to plane2D struct
     plane2D copyFromScreen(SDL_Rect src);
 
     // Copies a rectangle of pixels from plane2D struct to the screen
     plane2D copyFromPlane(plane2D& plane, SDL_Rect src);
 
-    // Clears the entire screen and draws the grid if grid size > 0 
-    void clearTheScreen();
-
-    // Redraw everything including the pixels and the gird
-    void redrawEverything();
-
     // Pastes a rectangle of pixels from plane2D struct to the screen
     void pasteToScreen(plane2D& plane, SDL_Rect src, xy<int> dstStartPixel);
 
     // Pastes a rectangle of pixels from plane2D struct to another plane2D struct 
     void pasteToPlane(plane2D& srcPlane, plane2D& dstPlane, SDL_Rect src, xy<int> dstStartPixel);
+
+// Draw section
 
     // Draws a pixel to the screen
     void drawPixel(xy<int> pixel);
