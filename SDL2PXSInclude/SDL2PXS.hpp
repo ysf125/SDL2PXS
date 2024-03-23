@@ -14,10 +14,32 @@
 enum options { none = 0, resizeTheScreen = 1, autoWidthAndHeight = 2, autoPixelsInXAndY = 4 };
 
 struct RGB { Uint8 R, G, B; };
+    
+void correctNegativeWidthAndHeight(SDL_Rect& rect);
 
-struct plane2D {
-    int pixelsInX, pixelsInY;
+class plane2D {
+    friend class SDL2PXS;
     S vector<S vector<RGB>> pixels;
+    int pixelsInX, pixelsInY;
+
+public :  
+    plane2D(int pixelsInX, int pixelsInY);
+
+    S tuple<int, int> getPixelsInXAndY();
+
+    void clearThePlane(RGB drawColor = { 0, 0, 0 });
+
+    bool notInsideThePlane(xy<int> pixel);
+
+    RGB getPixleColor(xy<int> pixel);
+
+    plane2D copyFromPlane(SDL_Rect src);
+
+    void pasteToPlane(plane2D& srcPlane, SDL_Rect src, xy<int> dstStartPixel);
+
+    void drawPixel(xy<int> pixel, RGB drawColor = { 0, 0, 0 });
+
+    void drawFillRect(SDL_Rect dst, RGB drawColor = { 0, 0, 0 });
 };
 
 class SDL2PXS {
@@ -26,7 +48,7 @@ class SDL2PXS {
     int PXSize, gridSize;
     RGB drawColor, gridColor;
     options PXSOptions;
-    plane2D PXSplane;
+    plane2D PXSPlane;
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Surface* surface;
@@ -35,10 +57,6 @@ class SDL2PXS {
     void setup();
 
     xy<int> getStartOfPixelPos(xy<int> pixel);
-
-    void setPixelColor(xy<int> pixel);
-
-    void correctNegativeWidthAndHeight(SDL_Rect& rect);
 
     void drawGrid();
 
@@ -60,16 +78,11 @@ public:
     // Clears the entire screen and draws the grid if grid size > 0 
     void clearTheScreen();
 
-// Utilities section
-
     // Restart the screen without deleting the pixels or the gird
     void restart();
 
     // Returns true if the given pixel isn't inside the screen
     bool notInsideTheScreen(xy<int> pixel);
-
-    // Returns true if the given pixel isn't inside the plane given
-    bool notInsideThePlane(plane2D& plane, xy<int> pixel);
 
 // Setters and getters section
 
@@ -94,9 +107,6 @@ public:
     // Returns RGB color for a pixel on the screen
     RGB getPixleColor(xy<int> pixel);
 
-    // Returns RGB color for a pixel on the plane given
-    RGB getPixleColorFromPlane(plane2D& plane, xy<int> pixel);
-
     // Sets the options for screen
     void setPXSOptions(options PXSOptions);
 
@@ -114,14 +124,8 @@ public:
     // Copies a rectangle of pixels from the screen to plane2D struct
     plane2D copyFromScreen(SDL_Rect src);
 
-    // Copies a rectangle of pixels from plane2D struct to the screen
-    plane2D copyFromPlane(plane2D& plane, SDL_Rect src);
-
     // Pastes a rectangle of pixels from plane2D struct to the screen
     void pasteToScreen(plane2D& plane, SDL_Rect src, xy<int> dstStartPixel);
-
-    // Pastes a rectangle of pixels from plane2D struct to another plane2D struct 
-    void pasteToPlane(plane2D& srcPlane, plane2D& dstPlane, SDL_Rect src, xy<int> dstStartPixel);
 
 // Draw section
 

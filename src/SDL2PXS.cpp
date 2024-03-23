@@ -1,25 +1,106 @@
 #include "SDL2PXS.hpp"
 
-// Public
+void correctNegativeWidthAndHeight(SDL_Rect& rect) {
+    if (rect.w < 0) { rect.x += (rect.w + 1); rect.w = abs(rect.w); }
+    if (rect.h < 0) { rect.y += (rect.h + 1); rect.h = abs(rect.h); }
+}
 
-// Utilities section
+// Private 
+
+void SDL2PXS::setup() {
+    auto [pixelsInX, pixelsInY] = PXSPlane.getPixelsInXAndY();
+
+    if ((PXSOptions & autoWidthAndHeight) == autoWidthAndHeight) {
+        width = (pixelsInX * PXSize) + ((pixelsInX - 1) * gridSize);
+        height = (pixelsInY * PXSize) + ((pixelsInY - 1) * gridSize);
+    }
+
+    if ((PXSOptions & autoPixelsInXAndY) == autoPixelsInXAndY) {
+        PXSPlane.pixelsInX = ceil(width / (PXSize + gridSize));
+        PXSPlane.pixelsInY = ceil(height / (PXSize + gridSize));
+    }
+
+    if ((PXSOptions & resizeTheScreen) == resizeTheScreen) SDL_SetWindowSize(window, width, height);
+    
+    if (gridSize > 0) drawGrid();
+
+    setDrawColor();
+    clearTheScreen();
+}
+
+xy<int> SDL2PXS::getStartOfPixelPos(xy<int> pixel) {
+    int x = (pixel.x * PXSize) + (pixel.x * gridSize),
+        y = (pixel.y * PXSize) + (pixel.y * gridSize);
+    return { x + startPixel.x, y + startPixel.y };
+}
+
+void SDL2PXS::drawGrid() {
+    SDL_DestroyTexture(gridTexture);
+    surface = SDL_CreateRGBSurface(0, width, height, 32, 0xff, 0xff00, 0xff0000, 0xff000000);
+    SDL_FillRect(surface, NULL, SDL_MapRGBA(surface->format, 0, 0, 0, 0));
+
+    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>();
+    Uint32 color = SDL_MapRGB(surface->format, gridColor.R, gridColor.G, gridColor.B);
+    for (int i = 0; i < get<0>(PXSPlane.getPixelsInXAndY()); i++) {
+        *rect = { getStartOfPixelPos({ i, 0 }).x - (gridSize + startPixel.x), 0, gridSize, height };
+        SDL_FillRect(surface, rect.get(), color);
+    }
+    for (int i = 0; i < get<1>(PXSPlane.getPixelsInXAndY()); i++) {
+        *rect = SDL_Rect{ 0, getStartOfPixelPos({ 0, i }).y - (gridSize + startPixel.y), width, gridSize };
+        SDL_FillRect(surface, rect.get(), color);
+    }
+
+    gridTexture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+}
+
+// Public
+// Main section
+
+SDL2PXS::SDL2PXS(SDL_Window* window, SDL_Renderer* renderer, int W, int H, int pixelsInX, int pixelsInY, int PXSize,
+options PXSOptions, xy<int> startPixel, int gridSize, RGB gridColor)
+    : startPixel(startPixel), width(W), height(H), PXSize(PXSize), gridSize(gridSize), gridColor(gridColor), PXSOptions(PXSOptions), PXSPlane(pixelsInX, pixelsInY), window(window), renderer(renderer) {
+    SDL_Init(SDL_INIT_VIDEO);
+    setup();
+}
+
+SDL2PXS::SDL2PXS(S string windowTitle, int W, int H, int pixelsInX, int pixelsInY, int PXSize,
+options PXSOptions, xy<int> startPixel, int gridSize, RGB gridColor)
+    : startPixel(startPixel), width(W), height(H), PXSize(PXSize), gridSize(gridSize), gridColor(gridColor), PXSOptions(PXSOptions), PXSPlane(pixelsInX, pixelsInY) {
+    SDL_Init(SDL_INIT_VIDEO);
+    window = SDL_CreateWindow(windowTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H, 0);
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    setup();
+}
+
+void SDL2PXS::closeSDL2PXS() {
+    SDL_Quit();
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyTexture(gridTexture);
+}
+
+void SDL2PXS::showChanges() { SDL_RenderPresent(renderer); }
+
+void SDL2PXS::clearTheScreen() {
+    S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(startPixel.x, startPixel.y, width, height);
+    SDL_RenderFillRect(renderer, rect.get());
+    PXSPlane.clearThePlane(drawColor);
+    if (gridSize > 0) SDL_RenderCopy(renderer, gridTexture, NULL, rect.get());
+}
 
 void SDL2PXS::restart() {
-    plane2D plane = PXSplane;
+    plane2D plane = PXSPlane;
     setup();
-    for (int i = 0; i < PXSplane.pixelsInY; i++) {
-        for (int j = 0; j < PXSplane.pixelsInX; j++) {
-            setDrawColor(getPixleColorFromPlane(plane, { j, i }));
+    for (int i = 0; i < get<1>(PXSPlane.getPixelsInXAndY()); i++) {
+        for (int j = 0; j < get<0>(PXSPlane.getPixelsInXAndY()); j++) {
+            setDrawColor(getPixleColor({ j, i }));
             drawPixel({ j, i });
         }
     }
 }
 
-bool SDL2PXS::notInsideTheScreen(xy<int> pixel) { return notInsideThePlane(PXSplane, pixel); }
-
-bool SDL2PXS::notInsideThePlane(plane2D& plane, xy<int> pixel) {
-    return (pixel.x < 0 || pixel.y < 0 || pixel.x > plane.pixelsInX || pixel.y > plane.pixelsInY);
-}
+bool SDL2PXS::notInsideTheScreen(xy<int> pixel) { return PXSPlane.notInsideThePlane(pixel); }
 
 // Setters and getters section
 
@@ -29,18 +110,13 @@ SDL_Renderer* SDL2PXS::getRenderer() { return renderer; }
 
 S tuple<int, int> SDL2PXS::getWidthAndHeight() { return { width, height }; }
 
-S tuple<int, int> SDL2PXS::getPixelsInXAndY() { return { PXSplane.pixelsInX, PXSplane.pixelsInY }; }
+S tuple<int, int> SDL2PXS::getPixelsInXAndY() { return PXSPlane.getPixelsInXAndY(); }
 
 RGB SDL2PXS::getDrawColor() { return drawColor; }
 
 options SDL2PXS::getPXSOptions() { return PXSOptions; }
 
-RGB SDL2PXS::getPixleColor(xy<int> pixel) { return getPixleColorFromPlane(PXSplane, pixel); }
-
-RGB SDL2PXS::getPixleColorFromPlane(plane2D& plane, xy<int> pixel) {
-    if (notInsideThePlane(plane, pixel)) return { 0, 0, 0 };
-    return plane.pixels[pixel.y][pixel.x];
-}
+RGB SDL2PXS::getPixleColor(xy<int> pixel) { return PXSPlane.getPixleColor(pixel); }
 
 void SDL2PXS::setPXSOptions(options PXSOptions) {
     this->PXSOptions = PXSOptions;
@@ -65,44 +141,15 @@ void SDL2PXS::setDrawColor(RGB color) {
 
 // Copy and paste section
 
-plane2D SDL2PXS::copyFromScreen(SDL_Rect src) { return copyFromPlane(PXSplane, src); }
-
-plane2D SDL2PXS::copyFromPlane(plane2D& plane, SDL_Rect src) {
-    correctNegativeWidthAndHeight(src);
-
-    RGB color;
-    plane2D returnedPlane = { src.w, src.h };
-    returnedPlane.pixels.resize(src.h);
-    for (int i = 0; i < src.h; i++) {
-        returnedPlane.pixels[i].resize(src.w);
-        for (int j = 0; j < src.w; j++) {
-            color = getPixleColorFromPlane(plane, { src.x + j, src.y + i });
-            returnedPlane.pixels[i][j] = color;
-        }
-    }
-    return returnedPlane;
-}
+plane2D SDL2PXS::copyFromScreen(SDL_Rect src) { return PXSPlane.copyFromPlane(src); }
 
 void SDL2PXS::pasteToScreen(plane2D& plane, SDL_Rect src, xy<int> dstStartPixel) {
     correctNegativeWidthAndHeight(src);
 
     for (int i = 0; i < src.h; i++) {
         for (int j = 0; j < src.w; j++) {
-            setDrawColor(getPixleColorFromPlane(plane, { src.x + j, src.y + i }));
+            setDrawColor(plane.getPixleColor({ src.x + j, src.y + i }));
             drawPixel({ dstStartPixel.x + j, dstStartPixel.y + i });
-        }
-    }
-}
-
-void SDL2PXS::pasteToPlane(plane2D& srcPlane, plane2D& dstPlane, SDL_Rect src, xy<int> dstStartPixel) {
-    correctNegativeWidthAndHeight(src);
-
-    RGB color;
-    for (int i = 0; i < src.h; i++) {
-        for (int j = 0; j < src.w; j++) {
-            if (notInsideThePlane(dstPlane, { src.x + j, src.y + i })) continue;
-            color = getPixleColorFromPlane(srcPlane, { src.x + j, src.y + i });
-            dstPlane.pixels[dstStartPixel.y + i][dstStartPixel.x + j] = color;
         }
     }
 }
@@ -113,7 +160,7 @@ void SDL2PXS::drawPixel(xy<int> pixel) {
     xy<int> startPosInRealPixels = getStartOfPixelPos(pixel);
     SDL_RenderFillRect(renderer, S make_unique<SDL_Rect>(startPosInRealPixels.x, startPosInRealPixels.y, PXSize, PXSize).get());
 
-    setPixelColor(pixel);
+    PXSPlane.drawPixel(pixel);
 }
 
 void SDL2PXS::drawRect(SDL_Rect dst) {
@@ -134,11 +181,7 @@ void SDL2PXS::drawFillRect(SDL_Rect dst) {
     S unique_ptr<SDL_Rect> rect = S make_unique<SDL_Rect>(startPosInRealPixels.x, startPosInRealPixels.y, widthInRealPixels, heightInRealPixels);
     SDL_RenderFillRect(renderer, rect.get());
 
-    for (int i = 0; i < dst.h; i++) {
-        for (int j = 0; j < dst.w; j++) {
-            setPixelColor({ dst.x + j, dst.y + i });
-        }
-    }
+    PXSPlane.drawFillRect(dst, drawColor);
 
     if (gridSize > 0) {
         *rect = SDL_Rect{ startPosInRealPixels.x - gridSize, startPosInRealPixels.y - gridSize, widthInRealPixels + gridSize, heightInRealPixels + gridSize };

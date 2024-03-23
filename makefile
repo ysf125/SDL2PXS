@@ -7,10 +7,10 @@ testAll :
 	cls
 
 buildDll :
-	g++ .\src\SDL2PXSMain.cpp -o SDL2PXSMain.o -c $(flags) $(include)
 	g++ .\src\SDL2PXS.cpp -o SDL2PXS.o -c $(flags) $(include)
-	g++ SDL2PXSMain.o SDL2PXS.o -o SDL2PXS.dll -shared $(dllFlags) $(flags) $(include)
-	del "SDL2PXSMain.o"
+	g++ .\src\plane2D.cpp -o plane2D.o -c $(flags) $(include)
+	g++ SDL2PXS.o plane2D.o -o SDL2PXS.dll -shared $(dllFlags) $(flags) $(include)
+	del "plane2D.o"
 	del "SDL2PXS.o"
 
 buildExe :
